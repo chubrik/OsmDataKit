@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Azure", "Utils.Azure\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Tests", "Utils.Tests\Utils.Tests.csproj", "{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.Abstractions", "Utils.Abstractions\Utils.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{605A63B3-266F-40CB-AB30-49468141CC2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{605A63B3-266F-40CB-AB30-49468141CC2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{605A63B3-266F-40CB-AB30-49468141CC2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{605A63B3-266F-40CB-AB30-49468141CC2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
