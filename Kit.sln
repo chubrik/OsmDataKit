@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Core", "Utils.Core\Utils.Core.csproj", "{4669EF6E-E5F6-409C-9F8D-CB7562FE0AF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Core", "Kit.Core\Kit.Core.csproj", "{4669EF6E-E5F6-409C-9F8D-CB7562FE0AF0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Azure", "Utils.Azure\Utils.Azure.csproj", "{417A551C-73EE-4765-8B26-561DD27098F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Azure", "Kit.Azure\Kit.Azure.csproj", "{417A551C-73EE-4765-8B26-561DD27098F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Tests", "Utils.Tests\Utils.Tests.csproj", "{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Tests", "Kit.Tests\Kit.Tests.csproj", "{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.Abstractions", "Utils.Abstractions\Utils.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Abstractions", "Kit.Abstractions\Kit.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
