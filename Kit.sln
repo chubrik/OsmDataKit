@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Azure", "Kit.Azure\Kit.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Tests", "Kit.Tests\Kit.Tests.csproj", "{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Abstractions", "Kit.Abstractions\Kit.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Abstractions", "Kit.Abstractions\Kit.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
