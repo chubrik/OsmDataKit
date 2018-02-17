@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Html", "Kit.Html\Kit.Ht
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Http", "Kit.Http\Kit.Http.csproj", "{C6670673-15D4-46C0-AAAC-DBD73B5FB75C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Mail", "Kit.Mail\Kit.Mail.csproj", "{A339BA11-EAE3-4A94-8998-14692D90406B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{C6670673-15D4-46C0-AAAC-DBD73B5FB75C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6670673-15D4-46C0-AAAC-DBD73B5FB75C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6670673-15D4-46C0-AAAC-DBD73B5FB75C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A339BA11-EAE3-4A94-8998-14692D90406B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A339BA11-EAE3-4A94-8998-14692D90406B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A339BA11-EAE3-4A94-8998-14692D90406B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A339BA11-EAE3-4A94-8998-14692D90406B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
