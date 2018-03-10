@@ -1,21 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Core", "Kit.Core\Kit.Core.csproj", "{4669EF6E-E5F6-409C-9F8D-CB7562FE0AF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Abstractions", "Kit.Abstractions\Kit.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Azure", "Kit.Azure\Kit.Azure.csproj", "{417A551C-73EE-4765-8B26-561DD27098F3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Core", "Kit.Core\Kit.Core.csproj", "{4669EF6E-E5F6-409C-9F8D-CB7562FE0AF0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Html", "Kit.Html\Kit.Html.csproj", "{00FA693E-43E2-44DA-BCD7-EA40C963D2A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Http", "Kit.Http\Kit.Http.csproj", "{C6670673-15D4-46C0-AAAC-DBD73B5FB75C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Http.Extensions", "Kit.Http.Extensions\Kit.Http.Extensions.csproj", "{FC45A563-991B-4E9A-A200-13533BF452EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Mail", "Kit.Mail\Kit.Mail.csproj", "{A339BA11-EAE3-4A94-8998-14692D90406B}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Tests", "Kit.Tests\Kit.Tests.csproj", "{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Abstractions", "Kit.Abstractions\Kit.Abstractions.csproj", "{605A63B3-266F-40CB-AB30-49468141CC2D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Html", "Kit.Html\Kit.Html.csproj", "{00FA693E-43E2-44DA-BCD7-EA40C963D2A4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Http", "Kit.Http\Kit.Http.csproj", "{C6670673-15D4-46C0-AAAC-DBD73B5FB75C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Mail", "Kit.Mail\Kit.Mail.csproj", "{A339BA11-EAE3-4A94-8998-14692D90406B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{A339BA11-EAE3-4A94-8998-14692D90406B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A339BA11-EAE3-4A94-8998-14692D90406B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A339BA11-EAE3-4A94-8998-14692D90406B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC45A563-991B-4E9A-A200-13533BF452EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC45A563-991B-4E9A-A200-13533BF452EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC45A563-991B-4E9A-A200-13533BF452EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC45A563-991B-4E9A-A200-13533BF452EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
