@@ -1,6 +1,6 @@
-/.vs/
+.vs/
 bin/
 obj/
-Properties/
 $*/
+*.pubxml
 *.user
