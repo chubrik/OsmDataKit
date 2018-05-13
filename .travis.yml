@@ -1,2 +1,5 @@
 language: csharp
-solution: Kit.sln
+mono: none
+dotnet: 2.1.200
+script:
+ - dotnet restore
