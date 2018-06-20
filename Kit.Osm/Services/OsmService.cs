@@ -9,21 +9,21 @@ namespace Kit.Osm
 {
     public static class OsmService
     {
-        public static void Validate(string srcPath)
+        public static void Validate(string path)
         {
-            Debug.Assert(srcPath != null);
+            Debug.Assert(path != null);
 
-            if (srcPath == null)
-                throw new ArgumentNullException(nameof(srcPath));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
-            LogService.Log($"OSM validation: {srcPath}");
+            LogService.Log($"OSM validation: {path}");
             var previousType = OsmGeoType.Node;
             long? previousId = 0;
             long count = 0;
             long totalCount = 0;
             long noIdCount = 0;
 
-            using (var fileStream = FileClient.OpenRead(srcPath))
+            using (var fileStream = FileClient.OpenRead(path))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
@@ -63,12 +63,12 @@ namespace Kit.Osm
             LogService.Log($"OSM validation completed");
         }
 
-        public static OsmResponse Load(string srcPath, Func<OsmGeo, bool> predicate)
+        public static OsmResponse Load(string path, Func<OsmGeo, bool> predicate)
         {
-            Debug.Assert(srcPath != null);
+            Debug.Assert(path != null);
 
-            if (srcPath == null)
-                throw new ArgumentNullException(nameof(srcPath));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
             Debug.Assert(predicate != null);
 
@@ -77,7 +77,7 @@ namespace Kit.Osm
 
             List<OsmGeo> geos;
 
-            using (var fileStream = FileClient.OpenRead(srcPath))
+            using (var fileStream = FileClient.OpenRead(path))
             {
                 var source = new PBFOsmStreamSource(fileStream);
                 geos = source.Where(predicate).ToList(); // ToList() should be there!
@@ -93,7 +93,7 @@ namespace Kit.Osm
                                 .ToDictionary(i => i.Id.GetValueOrDefault(), i => (Relation)i);
 
             LogService.Log(
-                $"loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
+                $"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
 
             LogService.Log("Complete"); //todo what?
 
@@ -108,28 +108,28 @@ namespace Kit.Osm
             };
         }
 
-        public static OsmResponse Load(string srcPath, OsmRequest query)
+        public static OsmResponse Load(string path, OsmRequest request)
         {
-            Debug.Assert(srcPath != null);
+            Debug.Assert(path != null);
 
-            if (srcPath == null)
-                throw new ArgumentNullException(nameof(srcPath));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
-            Debug.Assert(query != null);
+            Debug.Assert(request != null);
 
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
 
-            var nodeIds = query.NodeIds != null
-                ? new HashSet<long>(query.NodeIds.Distinct())
+            var nodeIds = request.NodeIds != null
+                ? new HashSet<long>(request.NodeIds.Distinct())
                 : new HashSet<long>();
 
-            var wayIds = query.WayIds != null
-                ? new HashSet<long>(query.WayIds.Distinct())
+            var wayIds = request.WayIds != null
+                ? new HashSet<long>(request.WayIds.Distinct())
                 : new HashSet<long>();
 
-            var relationIds = query.RelationIds != null
-                ? new HashSet<long>(query.RelationIds.Distinct())
+            var relationIds = request.RelationIds != null
+                ? new HashSet<long>(request.RelationIds.Distinct())
                 : new HashSet<long>();
 
             var nodes = new Dictionary<long, Node>();
@@ -140,7 +140,7 @@ namespace Kit.Osm
             var missedRelationIds = new List<long>();
             string logMessage;
 
-            using (var fileStream = FileClient.OpenRead(srcPath))
+            using (var fileStream = FileClient.OpenRead(path))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 

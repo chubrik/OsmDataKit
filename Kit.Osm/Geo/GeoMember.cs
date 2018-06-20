@@ -21,7 +21,7 @@ namespace Kit.Osm
             if (geo == null)
                 throw new ArgumentNullException(nameof(geo));
 
-            Debug.Assert(geo.Type != data.Type);
+            Debug.Assert(geo.Type == data.Type);
 
             if (geo.Type != data.Type)
                 throw new ArgumentException(nameof(geo));

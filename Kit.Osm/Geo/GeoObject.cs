@@ -29,8 +29,6 @@ namespace Kit.Osm
 
         public abstract bool IsBroken();
 
-        public bool HasTitle => !Title.IsNullOrWhiteSpace();
-
         public abstract GeoCoords AverageCoords();
 
         private string DebugInfo() =>

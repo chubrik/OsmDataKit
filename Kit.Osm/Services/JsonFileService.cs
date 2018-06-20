@@ -5,29 +5,29 @@ using System.IO;
 
 namespace Kit.Osm
 {
-    internal class FileService
+    internal class JsonFileService
     {
-        public static T Read<T>(string filePath) where T : class
+        public static T Read<T>(string path, string targetDirectory = null) where T : class
         {
-            Debug.Assert(filePath != null);
+            Debug.Assert(path != null);
 
-            if (filePath == null)
-                throw new ArgumentNullException(nameof(filePath));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
             var startTime = DateTimeOffset.Now;
-            var fullPath = FileClient.FullPath(filePath); //todo targetDirectory
-            LogService.Log($"Read json file: {fullPath}");
+            var nativePath = FileClient.NativePath(path, targetDirectory);
+            LogService.Log($"Read json file: {nativePath}");
             T obj;
 
             try
             {
-                using (var fileStream = FileClient.OpenRead(fullPath))
+                using (var fileStream = FileClient.OpenRead(path, targetDirectory))
                 using (var streamReader = new StreamReader(fileStream))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                     obj = new JsonSerializer().Deserialize<T>(jsonTextReader);
 
                 if (obj.Equals(null))
-                    throw new InvalidOperationException($"Wrong content \"{fullPath}\"");
+                    throw new InvalidOperationException($"Wrong json content: {nativePath}");
 
                 LogService.Log($"Read json file completed at {TimeHelper.FormattedLatency(startTime)}");
                 return obj;
@@ -39,12 +39,12 @@ namespace Kit.Osm
             }
         }
 
-        public static void Save<T>(string filePath, T obj) where T : class
+        public static void Write<T>(string path, T obj, string targetDirectory = null) where T : class
         {
-            Debug.Assert(filePath != null);
+            Debug.Assert(path != null);
 
-            if (filePath == null)
-                throw new ArgumentNullException(nameof(filePath));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
             Debug.Assert(obj != null);
 
@@ -52,9 +52,9 @@ namespace Kit.Osm
                 throw new ArgumentNullException(nameof(obj));
 
             var startTime = DateTimeOffset.Now;
-            var fullPath = FileClient.FullPath(filePath); //todo targetDirectory
-            LogService.Log($"Write json file: {fullPath}");
-            var dirPath = PathHelper.Parent(fullPath);
+            var nativePath = FileClient.NativePath(path, targetDirectory);
+            LogService.Log($"Write json file: {nativePath}");
+            var dirPath = PathHelper.Parent(nativePath);
 
             if (!Directory.Exists(dirPath))
             {
@@ -64,7 +64,7 @@ namespace Kit.Osm
 
             try
             {
-                using (var fileStream = FileClient.OpenWrite(fullPath))
+                using (var fileStream = FileClient.OpenWrite(path))
                 using (var streamWriter = new StreamWriter(fileStream))
                 using (var jsonTextWriter = new JsonTextWriter(streamWriter))
                 {
