@@ -134,7 +134,7 @@ namespace Kit.Osm
                     $"{response.MissedWayIds.Count} ways, " +
                     $"{response.MissedRelationIds.Count} relations");
 
-            var data = response.ToData(preventMissed: true);
+            var data = response.ToData();
             JsonFileService.Write(FullCachePath(cacheName), data);
             var objects = BuildObjects(data);
             LogService.Log("Load OSM response data complete");
