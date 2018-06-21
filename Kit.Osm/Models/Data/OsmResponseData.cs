@@ -16,10 +16,10 @@ namespace Kit.Osm
         public List<RelationData> Relations { get; set; }
 
         [JsonProperty]
-        public List<long> MissedNodesIds { get; set; }
+        public List<long> MissedNodeIds { get; set; }
 
         [JsonProperty]
-        public List<long> MissedWaysIds { get; set; }
+        public List<long> MissedWayIds { get; set; }
 
         [JsonProperty]
         public List<long> MissedRelationIds { get; set; }

@@ -10,8 +10,8 @@ namespace Kit.Osm
                 Nodes = response.Nodes?.Values.Select(i => i.ToData()).ToList(),
                 Ways = response.Ways?.Values.Select(i => i.ToData()).ToList(),
                 Relations = response.Relations?.Values.Select(i => i.ToData()).ToList(),
-                MissedNodesIds = response.MissedNodeIds,
-                MissedWaysIds = response.MissedWayIds,
+                MissedNodeIds = response.MissedNodeIds,
+                MissedWayIds = response.MissedWayIds,
                 MissedRelationIds = response.MissedRelationIds
             };
     }

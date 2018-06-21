@@ -301,6 +301,6 @@ namespace Kit.Osm
             $"$osm-cache/{cacheName}.json";
 
         private static string StepCachePath(string cacheName, int step) =>
-            $"$osm-cache/{cacheName}/{cacheName} - step {step}.json";
+            $"$osm-cache/{cacheName} - step {step}.json";
     }
 }

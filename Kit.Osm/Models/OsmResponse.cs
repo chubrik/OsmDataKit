@@ -47,8 +47,8 @@ namespace Kit.Osm
                 Members = GetRelationMembers(i)
             }).ToDictionary(i => i.Id.Value);
 
-            MissedNodeIds = data.MissedNodesIds;
-            MissedWayIds = data.MissedWaysIds;
+            MissedNodeIds = data.MissedNodeIds;
+            MissedWayIds = data.MissedWayIds;
             MissedRelationIds = data.MissedRelationIds;
         }
 
