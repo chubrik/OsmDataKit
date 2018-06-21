@@ -2,15 +2,15 @@
 
 namespace Kit.Osm
 {
-    public class GeoSet
+    public class OsmObjectResponse
     {
-        public IReadOnlyList<GeoPoint> Points { get; set; }
-        public IReadOnlyList<GeoLine> Lines { get; set; }
-        public IReadOnlyList<GeoGroup> Groups { get; set; }
-        public IReadOnlyList<GeoLine> BrokenLines { get; set; }
-        public IReadOnlyList<GeoGroup> BrokenGroups { get; set; }
-        public IReadOnlyDictionary<long, GeoPoint> AllPointsDict { get; set; }
-        public IReadOnlyDictionary<long, GeoLine> AllLinesDict { get; set; }
-        public IReadOnlyDictionary<long, GeoGroup> AllGroupsDict { get; set; }
+        public IReadOnlyList<OsmNode> Nodes { get; set; }
+        public IReadOnlyList<OsmWay> Ways { get; set; }
+        public IReadOnlyList<OsmRelation> Relations { get; set; }
+        public IReadOnlyList<OsmWay> BrokenWays { get; set; }
+        public IReadOnlyList<OsmRelation> BrokenRelations { get; set; }
+        public IReadOnlyDictionary<long, OsmNode> AllNodesDict { get; set; }
+        public IReadOnlyDictionary<long, OsmWay> AllWaysDict { get; set; }
+        public IReadOnlyDictionary<long, OsmRelation> AllRelationsDict { get; set; }
     }
 }

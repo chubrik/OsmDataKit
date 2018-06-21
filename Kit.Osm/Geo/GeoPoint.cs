@@ -1,21 +1,22 @@
-﻿using System;
+﻿using OsmSharp;
+using System;
 using System.Diagnostics;
 
 namespace Kit.Osm
 {
-    public class GeoPoint : GeoObject
+    public class OsmNode : OsmObject
     {
-        public float Latitude { get; }
-        public float Longitude { get; }
+        public double Latitude { get; }
+        public double Longitude { get; }
 
-        internal GeoPoint(OsmNodeData data) : base(data)
+        internal OsmNode(NodeData data) : base(data)
         {
-            Debug.Assert(data.Coords.Length == 2);
+            Debug.Assert(data?.Coords?.Length == 2);
 
-            if (data.Coords.Length != 2)
-                throw new ArgumentNullException(nameof(data));
+            if (data?.Coords?.Length != 2)
+                throw new ArgumentException(nameof(data));
 
-            Type = GeoType.Point;
+            Type = OsmGeoType.Node;
             Latitude = data.Coords[0];
             Longitude = data.Coords[1];
         }

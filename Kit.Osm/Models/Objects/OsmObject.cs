@@ -1,19 +1,20 @@
-﻿using System;
+﻿using OsmSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Kit.Osm
 {
     [DebuggerDisplay("{" + nameof(DebugInfo) + "(),nq}")]
-    public abstract class GeoObject
+    public abstract class OsmObject
     {
-        public long Id { get; protected set; }
-        public string Title { get; protected set; }
-        public GeoType Type { get; protected set; }
-        public IDictionary<string, string> Tags { get; protected set; }
+        public long Id { get; }
+        public string Title { get; }
+        public OsmGeoType Type { get; protected set; }
+        public IDictionary<string, string> Tags { get; }
 
-        // was protected
-        internal GeoObject(OsmObjectData data)
+        // Was protected
+        internal OsmObject(OsmGeoData data)
         {
             Debug.Assert(data != null);
 
@@ -24,7 +25,7 @@ namespace Kit.Osm
             Tags = data.Tags;
 
             // Title should be after Tags
-            Title = this.TryGetTitle();
+            Title = OsmHelper.TryGetTitle(this);
         }
 
         public abstract bool IsBroken();

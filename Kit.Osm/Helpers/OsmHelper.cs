@@ -1,35 +1,16 @@
-﻿using OsmSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 namespace Kit.Osm
 {
-    internal static class GeoExtensions
+    internal static class OsmHelper
     {
-        public static OsmGeoType ToOsmType(this GeoType type)
-        {
-            switch (type)
-            {
-                case GeoType.Point:
-                    return OsmGeoType.Node;
-
-                case GeoType.Line:
-                    return OsmGeoType.Way;
-
-                case GeoType.Group:
-                    return OsmGeoType.Relation;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type));
-            }
-        }
-
-        public static GeoCoords AverageCoords(this IReadOnlyCollection<GeoPoint> points) =>
+        public static GeoCoords AverageCoords(IReadOnlyCollection<OsmNode> nodes) =>
             new GeoCoords(
-                points.Sum(i => i.Latitude) / points.Count,
-                points.Sum(i => i.Longitude) / points.Count
+                nodes.Sum(i => i.Latitude) / nodes.Count,
+                nodes.Sum(i => i.Longitude) / nodes.Count
             );
 
         private static readonly List<string> _tagNames =
@@ -38,7 +19,7 @@ namespace Kit.Osm
         private static readonly List<string> _tagNamesCyr =
             new List<string> { "name:ru", "name" };
 
-        public static string TryGetTitle(this GeoObject geo)
+        public static string TryGetTitle(OsmObject geo)
         {
             Debug.Assert(geo != null);
 

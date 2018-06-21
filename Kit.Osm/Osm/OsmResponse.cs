@@ -9,23 +9,23 @@ namespace Kit.Osm
 {
     public class OsmResponse
     {
-        public Dictionary<long, Node> Nodes { get; set; }
-        public Dictionary<long, Way> Ways { get; set; }
-        public Dictionary<long, Relation> Relations { get; set; }
-        public List<long> MissedNodeIds { get; set; }
-        public List<long> MissedWayIds { get; set; }
-        public List<long> MissedRelationIds { get; set; }
+        public Dictionary<long, Node> Nodes { get; internal set; }
+        public Dictionary<long, Way> Ways { get; internal set; }
+        public Dictionary<long, Relation> Relations { get; internal set; }
+        public List<long> MissedNodeIds { get; internal set; }
+        public List<long> MissedWayIds { get; internal set; }
+        public List<long> MissedRelationIds { get; internal set; }
 
         public OsmResponse() { }
 
-        internal OsmResponse(OsmDataSet dataSet)
+        internal OsmResponse(OsmResponseData data)
         {
-            Debug.Assert(dataSet != null);
+            Debug.Assert(data != null);
 
-            if (dataSet == null)
-                throw new ArgumentNullException(nameof(dataSet));
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
 
-            Nodes = dataSet.Nodes.Select(i => new Node
+            Nodes = data.Nodes.Select(i => new Node
             {
                 Id = i.Id,
                 Tags = new TagsCollection(i.Tags),
@@ -33,27 +33,27 @@ namespace Kit.Osm
                 Longitude = i.Coords[1]
             }).ToDictionary(i => i.Id.Value);
 
-            Ways = dataSet.Ways.Select(i => new Way
+            Ways = data.Ways.Select(i => new Way
             {
                 Id = i.Id,
                 Tags = new TagsCollection(i.Tags),
                 Nodes = i.NodeIds.ToArray()
             }).ToDictionary(i => i.Id.Value);
 
-            Relations = dataSet.Relations.Select(i => new Relation
+            Relations = data.Relations.Select(i => new Relation
             {
                 Id = i.Id,
                 Tags = new TagsCollection(i.Tags),
                 Members = GetRelationMembers(i)
             }).ToDictionary(i => i.Id.Value);
 
-            MissedNodeIds = dataSet.MissedNodesIds;
-            MissedWayIds = dataSet.MissedWaysIds;
-            MissedRelationIds = dataSet.MissedRelationIds;
+            MissedNodeIds = data.MissedNodesIds;
+            MissedWayIds = data.MissedWaysIds;
+            MissedRelationIds = data.MissedRelationIds;
         }
 
-        private static RelationMember[] GetRelationMembers(OsmRelationData data) =>
+        private static RelationMember[] GetRelationMembers(RelationData data) =>
             data.Members.Select(i =>
-                new RelationMember(i.Id, i.Role, i.Type.ToOsmType())).ToArray();
+                new RelationMember(i.Id, i.Role, i.Type)).ToArray();
     }
 }

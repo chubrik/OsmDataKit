@@ -9,7 +9,7 @@ namespace Kit.Osm
 {
     public static class OsmService
     {
-        public static void Validate(string path)
+        public static void ValidateSource(string path)
         {
             Debug.Assert(path != null);
 

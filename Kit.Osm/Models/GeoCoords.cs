@@ -6,16 +6,16 @@ namespace Kit.Osm
 {
     public class GeoCoords
     {
-        public float Latitude { get; protected set; }
-        public float Longitude { get; protected set; }
+        public double Latitude { get; }
+        public double Longitude { get; }
 
-        public GeoCoords(float latitude, float longitude)
+        public GeoCoords(double latitude, double longitude)
         {
             Latitude = latitude;
             Longitude = longitude;
         }
 
-        public GeoCoords(IReadOnlyList<float> coords)
+        public GeoCoords(IReadOnlyList<double> coords)
         {
             Debug.Assert(coords.Count == 2);
 

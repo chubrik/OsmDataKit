@@ -6,10 +6,10 @@ using System.Linq;
 
 namespace Kit.Osm
 {
-    public static class GeoService
+    public static class OsmObjectService
     {
-        public static GeoGroup LoadGroup(
-            string path, string cacheName, long osmRelationId, int stepLimit = 0)
+        public static OsmRelation LoadRelationObject(
+            string path, string cacheName, long relationId, int stepLimit = 0)
         {
             Debug.Assert(path != null);
 
@@ -25,38 +25,38 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cachePath))
             {
-                var dataSet = JsonFileService.Read<OsmDataSet>(cachePath);
-                return BuildObjects(dataSet).AllGroupsDict[osmRelationId];
+                var data = JsonFileService.Read<OsmResponseData>(cachePath);
+                return BuildObjects(data).AllRelationsDict[relationId];
             }
 
             if (!FileClient.Exists(path))
                 throw new InvalidOperationException();
 
-            LogService.Log("Load OSM dataset");
+            LogService.Log("Load OSM response data");
             var cacheStepPath = StepCachePath(cacheName, 1);
             OsmResponse response;
 
             if (FileClient.Exists(cacheStepPath))
             {
-                var dataSet = JsonFileService.Read<OsmDataSet>(cacheStepPath);
-                response = new OsmResponse(dataSet);
+                var data = JsonFileService.Read<OsmResponseData>(cacheStepPath);
+                response = new OsmResponse(data);
             }
             else
             {
                 var request = new OsmRequest
                 {
-                    RelationIds = new List<long> { osmRelationId }
+                    RelationIds = new List<long> { relationId }
                 };
 
                 LogService.Log($"Step 1");
                 response = OsmService.Load(path, request);
-                JsonFileService.Write(cacheStepPath, new OsmDataSet(response));
+                JsonFileService.Write(cacheStepPath, response.ToData());
             }
 
-            return LoadSteps(path, cacheName, response, stepLimit).AllGroupsDict[osmRelationId];
+            return LoadSteps(path, cacheName, response, stepLimit).AllRelationsDict[relationId];
         }
 
-        public static GeoSet Load(
+        public static OsmObjectResponse LoadObjects(
             string path, string cacheName, Func<OsmGeo, bool> predicate, int stepLimit = 0)
         {
             Debug.Assert(path != null);
@@ -78,33 +78,33 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cachePath))
             {
-                var dataSet = JsonFileService.Read<OsmDataSet>(cachePath);
-                return BuildObjects(dataSet);
+                var data = JsonFileService.Read<OsmResponseData>(cachePath);
+                return BuildObjects(data);
             }
 
             if (!FileClient.Exists(path))
                 throw new InvalidOperationException();
 
-            LogService.Log("Load OSM dataset");
+            LogService.Log("Load OSM response data");
             var cacheStepPath = StepCachePath(cacheName, 1);
             OsmResponse response;
 
             if (FileClient.Exists(cacheStepPath))
             {
-                var dataSet = JsonFileService.Read<OsmDataSet>(cacheStepPath);
-                response = new OsmResponse(dataSet);
+                var data = JsonFileService.Read<OsmResponseData>(cacheStepPath);
+                response = new OsmResponse(data);
             }
             else
             {
                 LogService.Log($"Step 1");
                 response = OsmService.Load(path, predicate);
-                JsonFileService.Write(cacheStepPath, new OsmDataSet(response));
+                JsonFileService.Write(cacheStepPath, response.ToData());
             }
 
             return LoadSteps(path, cacheName, response, stepLimit);
         }
 
-        private static GeoSet LoadSteps(
+        private static OsmObjectResponse LoadSteps(
             string path, string cacheName, OsmResponse response, int stepLimit)
         {
             if (stepLimit != 1)
@@ -134,11 +134,11 @@ namespace Kit.Osm
                     $"{response.MissedWayIds.Count} ways, " +
                     $"{response.MissedRelationIds.Count} relations");
 
-            var dataSet = new OsmDataSet(response, preventMissed: true);
-            JsonFileService.Write(FullCachePath(cacheName), dataSet);
-            var geoSet = BuildObjects(dataSet);
-            LogService.Log("Load OSM dataset complete");
-            return geoSet;
+            var data = response.ToData(preventMissed: true);
+            JsonFileService.Write(FullCachePath(cacheName), data);
+            var objects = BuildObjects(data);
+            LogService.Log("Load OSM response data complete");
+            return objects;
         }
 
         private static bool FillNested(
@@ -149,8 +149,8 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cacheStepPath))
             {
-                var dataSet = JsonFileService.Read<OsmDataSet>(cacheStepPath);
-                newResponse = new OsmResponse(dataSet);
+                var data = JsonFileService.Read<OsmResponseData>(cacheStepPath);
+                newResponse = new OsmResponse(data);
             }
             else
             {
@@ -195,7 +195,7 @@ namespace Kit.Osm
 
                 LogService.Log($"Step {step}");
                 newResponse = OsmService.Load(path, request);
-                JsonFileService.Write(cacheStepPath, new OsmDataSet(newResponse));
+                JsonFileService.Write(cacheStepPath, newResponse.ToData());
             }
 
             response.Nodes.AddRange(newResponse.Nodes);
@@ -207,43 +207,43 @@ namespace Kit.Osm
             return true;
         }
 
-        private static GeoSet BuildObjects(OsmDataSet dataSet)
+        private static OsmObjectResponse BuildObjects(OsmResponseData data)
         {
             LogService.Log("Build geo objects");
 
-            var allPointsDict =
-                dataSet.Nodes.Select(i => new GeoPoint(i)).ToDictionary(i => i.Id, i => i);
+            var allNodesDict =
+                data.Nodes.Select(i => new OsmNode(i)).ToDictionary(i => i.Id, i => i);
 
-            var allLinesDict =
-                dataSet.Ways.Select(i => new GeoLine(i, allPointsDict)).ToDictionary(i => i.Id, i => i);
+            var allWaysDict =
+                data.Ways.Select(i => new OsmWay(i, allNodesDict)).ToDictionary(i => i.Id, i => i);
 
-            var allGroupsDict =
-                dataSet.Relations.Select(i => new GeoGroup(i)).ToDictionary(i => i.Id, i => i);
+            var allRelationsDict =
+                data.Relations.Select(i => new OsmRelation(i)).ToDictionary(i => i.Id, i => i);
 
-            foreach (var relationData in dataSet.Relations)
+            foreach (var relationData in data.Relations)
             {
-                var members = new List<GeoMember>();
+                var members = new List<OsmMember>();
 
                 foreach (var memberData in relationData.Members)
                 {
                     switch (memberData.Type)
                     {
-                        case GeoType.Point:
-                            if (allPointsDict.ContainsKey(memberData.Id))
+                        case OsmGeoType.Node:
+                            if (allNodesDict.ContainsKey(memberData.Id))
                                 members.Add(
-                                    new GeoMember(memberData, allPointsDict[memberData.Id]));
+                                    new OsmMember(memberData, allNodesDict[memberData.Id]));
                             break;
 
-                        case GeoType.Line:
-                            if (allLinesDict.ContainsKey(memberData.Id))
+                        case OsmGeoType.Way:
+                            if (allWaysDict.ContainsKey(memberData.Id))
                                 members.Add(
-                                    new GeoMember(memberData, allLinesDict[memberData.Id]));
+                                    new OsmMember(memberData, allWaysDict[memberData.Id]));
                             break;
 
-                        case GeoType.Group:
-                            if (allGroupsDict.ContainsKey(memberData.Id))
+                        case OsmGeoType.Relation:
+                            if (allRelationsDict.ContainsKey(memberData.Id))
                                 members.Add(
-                                    new GeoMember(memberData, allGroupsDict[memberData.Id]));
+                                    new OsmMember(memberData, allRelationsDict[memberData.Id]));
                             break;
 
                         default:
@@ -251,49 +251,49 @@ namespace Kit.Osm
                     }
                 }
 
-                allGroupsDict[relationData.Id].SetMembers(members);
+                allRelationsDict[relationData.Id].Members = members;
             }
 
-            var linePointIds =
-                allLinesDict.Values.SelectMany(i => i.Points).Select(i => i.Id);
+            var wayNodeIds =
+                allWaysDict.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
 
-            var groupPointIds =
-                allGroupsDict.Values.SelectMany(i => i.Points()).Select(i => i.Id);
+            var relNodeIds =
+                allRelationsDict.Values.SelectMany(i => i.Nodes()).Select(i => i.Id);
 
-            var memberPointIds =
-                new HashSet<long>(linePointIds.Concat(groupPointIds));
+            var memberNodeIds =
+                new HashSet<long>(wayNodeIds.Concat(relNodeIds));
 
-            var memberLineIds =
-                new HashSet<long>(allGroupsDict.Values.SelectMany(i => i.Lines()).Select(i => i.Id));
+            var memberWayIds =
+                new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Ways()).Select(i => i.Id));
 
-            var memberGroupIds =
-                new HashSet<long>(allGroupsDict.Values.SelectMany(i => i.Groups()).Select(i => i.Id));
+            var memberRelationIds =
+                new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Relations()).Select(i => i.Id));
 
-            var rootPoints =
-                allPointsDict.Values.Where(i => !memberPointIds.Contains(i.Id)).ToList();
+            var rootNodes =
+                allNodesDict.Values.Where(i => !memberNodeIds.Contains(i.Id)).ToList();
 
-            var rootLines =
-                allLinesDict.Values.Where(i => !memberLineIds.Contains(i.Id)).ToList();
+            var rootWays =
+                allWaysDict.Values.Where(i => !memberWayIds.Contains(i.Id)).ToList();
 
-            var rootGroups =
-                allGroupsDict.Values.Where(i => !memberGroupIds.Contains(i.Id)).ToList();
+            var rootRelations =
+                allRelationsDict.Values.Where(i => !memberRelationIds.Contains(i.Id)).ToList();
 
-            var validRootPoints = rootPoints.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
-            var validRootLines = rootLines.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
-            var validRootGroups = rootGroups.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
-            var brokenRootLines = rootLines.Where(i => i.IsBroken()).ToList();
-            var brokenRootGroups = rootGroups.Where(i => i.IsBroken()).ToList();
+            var validRootNodes = rootNodes.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
+            var validRootWays = rootWays.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
+            var validRootRelations = rootRelations.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
+            var brokenRootWays = rootWays.Where(i => i.IsBroken()).ToList();
+            var brokenRootRelations = rootRelations.Where(i => i.IsBroken()).ToList();
 
-            return new GeoSet
+            return new OsmObjectResponse
             {
-                Points = validRootPoints,
-                Lines = validRootLines,
-                Groups = validRootGroups,
-                BrokenLines = brokenRootLines,
-                BrokenGroups = brokenRootGroups,
-                AllPointsDict = allPointsDict,
-                AllLinesDict = allLinesDict,
-                AllGroupsDict = allGroupsDict
+                Nodes = validRootNodes,
+                Ways = validRootWays,
+                Relations = validRootRelations,
+                BrokenWays = brokenRootWays,
+                BrokenRelations = brokenRootRelations,
+                AllNodesDict = allNodesDict,
+                AllWaysDict = allWaysDict,
+                AllRelationsDict = allRelationsDict
             };
         }
 
