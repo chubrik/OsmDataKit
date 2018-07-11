@@ -25,7 +25,7 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cachePath))
             {
-                var data = JsonFileService.Read<OsmResponseData>(cachePath);
+                var data = JsonFileClient.Read<OsmResponseData>(cachePath);
                 return BuildObjects(data).AllRelationsDict[relationId];
             }
 
@@ -38,7 +38,7 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cacheStepPath))
             {
-                var data = JsonFileService.Read<OsmResponseData>(cacheStepPath);
+                var data = JsonFileClient.Read<OsmResponseData>(cacheStepPath);
                 response = new OsmResponse(data);
             }
             else
@@ -50,7 +50,7 @@ namespace Kit.Osm
 
                 LogService.Log($"Step 1");
                 response = OsmService.Load(path, request);
-                JsonFileService.Write(cacheStepPath, response.ToData());
+                JsonFileClient.Write(cacheStepPath, response.ToData());
             }
 
             return LoadSteps(path, cacheName, response, stepLimit).AllRelationsDict[relationId];
@@ -78,7 +78,7 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cachePath))
             {
-                var data = JsonFileService.Read<OsmResponseData>(cachePath);
+                var data = JsonFileClient.Read<OsmResponseData>(cachePath);
                 return BuildObjects(data);
             }
 
@@ -91,14 +91,14 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cacheStepPath))
             {
-                var data = JsonFileService.Read<OsmResponseData>(cacheStepPath);
+                var data = JsonFileClient.Read<OsmResponseData>(cacheStepPath);
                 response = new OsmResponse(data);
             }
             else
             {
                 LogService.Log($"Step 1");
                 response = OsmService.Load(path, predicate);
-                JsonFileService.Write(cacheStepPath, response.ToData());
+                JsonFileClient.Write(cacheStepPath, response.ToData());
             }
 
             return LoadSteps(path, cacheName, response, stepLimit);
@@ -135,7 +135,7 @@ namespace Kit.Osm
                     $"{response.MissedRelationIds.Count} relations");
 
             var data = response.ToData();
-            JsonFileService.Write(FullCachePath(cacheName), data);
+            JsonFileClient.Write(FullCachePath(cacheName), data);
             var objects = BuildObjects(data);
             LogService.Log("Load OSM response data complete");
             return objects;
@@ -149,7 +149,7 @@ namespace Kit.Osm
 
             if (FileClient.Exists(cacheStepPath))
             {
-                var data = JsonFileService.Read<OsmResponseData>(cacheStepPath);
+                var data = JsonFileClient.Read<OsmResponseData>(cacheStepPath);
                 newResponse = new OsmResponse(data);
             }
             else
@@ -195,7 +195,7 @@ namespace Kit.Osm
 
                 LogService.Log($"Step {step}");
                 newResponse = OsmService.Load(path, request);
-                JsonFileService.Write(cacheStepPath, newResponse.ToData());
+                JsonFileClient.Write(cacheStepPath, newResponse.ToData());
             }
 
             response.Nodes.AddRange(newResponse.Nodes);
@@ -258,16 +258,16 @@ namespace Kit.Osm
                 allWaysDict.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
 
             var relNodeIds =
-                allRelationsDict.Values.SelectMany(i => i.Nodes()).Select(i => i.Id);
+                allRelationsDict.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
 
             var memberNodeIds =
                 new HashSet<long>(wayNodeIds.Concat(relNodeIds));
 
             var memberWayIds =
-                new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Ways()).Select(i => i.Id));
+                new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Ways).Select(i => i.Id));
 
             var memberRelationIds =
-                new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Relations()).Select(i => i.Id));
+                new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Relations).Select(i => i.Id));
 
             var rootNodes =
                 allNodesDict.Values.Where(i => !memberNodeIds.Contains(i.Id)).ToList();

@@ -13,12 +13,11 @@ Has advanced diagnostics and the most useful features.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="OsmSharp" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kit.Core\Kit.Core.csproj" />
+    <ProjectReference Include="..\Kit.Json\Kit.Json.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Mail", "Kit.Mail\Kit.Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Tests", "Kit.Tests\Kit.Tests.csproj", "{810C0CE4-2629-4CCB-8FC7-9ABBFB2284E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Osm", "Kit.Osm\Kit.Osm.csproj", "{11CECC28-E4FF-47C1-98ED-AE97619FCA52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kit.Osm", "Kit.Osm\Kit.Osm.csproj", "{11CECC28-E4FF-47C1-98ED-AE97619FCA52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit.Json", "Kit.Json\Kit.Json.csproj", "{5636E0E9-E0D0-49BE-B9EF-AB6012A5382D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{11CECC28-E4FF-47C1-98ED-AE97619FCA52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11CECC28-E4FF-47C1-98ED-AE97619FCA52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11CECC28-E4FF-47C1-98ED-AE97619FCA52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5636E0E9-E0D0-49BE-B9EF-AB6012A5382D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5636E0E9-E0D0-49BE-B9EF-AB6012A5382D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5636E0E9-E0D0-49BE-B9EF-AB6012A5382D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5636E0E9-E0D0-49BE-B9EF-AB6012A5382D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
