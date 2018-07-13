@@ -278,11 +278,11 @@ namespace Kit.Osm
             var rootRelations =
                 allRelationsDict.Values.Where(i => !memberRelationIds.Contains(i.Id)).ToList();
 
-            var validRootNodes = rootNodes.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
-            var validRootWays = rootWays.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
-            var validRootRelations = rootRelations.Where(i => !i.IsBroken() && !i.Title.IsNullOrWhiteSpace()).ToList();
-            var brokenRootWays = rootWays.Where(i => i.IsBroken()).ToList();
-            var brokenRootRelations = rootRelations.Where(i => i.IsBroken()).ToList();
+            var validRootNodes = rootNodes.Where(i => !i.IsBroken && i.HasTitle).ToList();
+            var validRootWays = rootWays.Where(i => !i.IsBroken && i.HasTitle).ToList();
+            var validRootRelations = rootRelations.Where(i => !i.IsBroken && i.HasTitle).ToList();
+            var brokenRootWays = rootWays.Where(i => i.IsBroken).ToList();
+            var brokenRootRelations = rootRelations.Where(i => i.IsBroken).ToList();
 
             return new OsmObjectResponse
             {

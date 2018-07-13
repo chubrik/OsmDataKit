@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Kit.Osm
 {
-    public class GeoCoords
+    public class GeoCoords : IGeoCoords
     {
         public double Latitude { get; }
         public double Longitude { get; }

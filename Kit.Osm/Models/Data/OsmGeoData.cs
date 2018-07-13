@@ -10,6 +10,6 @@ namespace Kit.Osm
         public long Id { get; set; }
 
         [JsonProperty("g")]
-        public IDictionary<string, string> Tags { get; set; }
+        public Dictionary<string, string> Tags { get; set; }
     }
 }

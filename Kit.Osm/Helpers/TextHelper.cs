@@ -7,18 +7,10 @@ using System.Text.RegularExpressions;
 
 namespace Kit.Osm
 {
-    internal static class TextHelper
+    public static class TextHelper
     {
         #region Constants & Maps
 
-        // https://en.wikipedia.org/wiki/Latin_script_in_Unicode
-        private const string LatinLettersPattern = "A-Za-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u01f0";
-
-        // https://en.wikipedia.org/wiki/Cyrillic_script_in_Unicode
-        private const string CyrillicLettersPattern = "\u0400-\u052f";
-
-        private const string SymbolsPattern = " `'‘’ʻʼ-";
-        
         private static readonly Dictionary<string, string> _translitMap =
             new Dictionary<string, string> {
                 { "а", "a" },
@@ -70,7 +62,7 @@ namespace Kit.Osm
                 { "ғ", "g" },
                 { "ң", "n" },
                 { "є", "e" },
-                { "ј", "j" }, // cyrillic "j"
+                { "ј", "y" }, // cyrillic "j"
                 { "љ", "l" },
                 { "ћ", "h" },
                 { "џ", "ts"},
@@ -88,18 +80,7 @@ namespace Kit.Osm
 
         #endregion
 
-        public static bool HasOnlyLatinLetters(string text) =>
-            text.IsNullOrWhiteSpace()
-                ? false
-                : Regex.IsMatch(text, $"^[{LatinLettersPattern + SymbolsPattern}]+$");
-
-        public static bool HasOnlyCyrillicLetters(string text) =>
-            text.IsNullOrWhiteSpace()
-                ? false
-                : Regex.IsMatch(text, $"^[{CyrillicLettersPattern + SymbolsPattern}]+$");
-
-        public static string FixApostrophe(string text) =>
-            Regex.Replace(text.Trim(), "[`'‘ʻʼ]", "’");
+        public static string FixApostrophe(string text) => Regex.Replace(text, "[`'‘ʻʼ]", "’");
 
         public static string CyrillicToLatin(string text)
         {
@@ -130,7 +111,7 @@ namespace Kit.Osm
             if (!Regex.IsMatch(result.ToLower(), @"^[a-z ’-]+$"))
                 LogService.LogWarning($"Non-translited cyrillic title: {result}");
 
-            return result.Trim();
+            return result;
         }
     }
 }

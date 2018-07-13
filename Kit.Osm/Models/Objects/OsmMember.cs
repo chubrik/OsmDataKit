@@ -25,7 +25,21 @@ namespace Kit.Osm
             Geo = geo;
         }
 
+        public OsmMember(string role, OsmObject geo)
+        {
+            Debug.Assert(!role.IsNullOrEmpty());
+            Debug.Assert(geo != null);
+
+            if (role.IsNullOrEmpty())
+                throw new ArgumentException(nameof(role));
+
+            Role = role;
+            Geo = geo ?? throw new ArgumentNullException(nameof(geo));
+        }
+
+#if DEBUG
         private string DebugInfo() =>
-            Geo.Type.ToString()[0] + Geo.Id.ToString() + " - " + Role + " - " + OsmHelper.TryGetTitle(Geo);
+            Geo.Type.ToString()[0] + Geo.Id.ToString() + " - " + Role + " - " + Geo.Title;
+#endif
     }
 }
