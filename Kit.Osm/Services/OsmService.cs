@@ -16,7 +16,7 @@ namespace Kit.Osm
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            LogService.Log($"OSM validation: {path}");
+            LogService.LogInfo($"OSM validation: {path}");
             var previousType = OsmGeoType.Node;
             long? previousId = 0;
             long count = 0;
@@ -31,7 +31,7 @@ namespace Kit.Osm
                 {
                     if (entry.Type > previousType)
                     {
-                        LogService.Log($"Found {count} {previousType.ToString().ToLower()}s");
+                        LogService.LogInfo($"Found {count} {previousType.ToString().ToLower()}s");
                         totalCount += count;
                         count = 0;
                         previousType = entry.Type;
@@ -54,13 +54,13 @@ namespace Kit.Osm
             }
 
             totalCount += count;
-            LogService.Log($"Found {count} {previousType.ToString().ToLower()}s");
-            LogService.Log($"Total {totalCount} entries");
+            LogService.LogInfo($"Found {count} {previousType.ToString().ToLower()}s");
+            LogService.LogInfo($"Total {totalCount} entries");
 
             if (noIdCount > 0)
-                LogService.Log($"{noIdCount} entries has no id");
+                LogService.LogWarning($"{noIdCount} entries has no id");
 
-            LogService.Log($"OSM validation completed");
+            LogService.LogInfo($"OSM validation completed");
         }
 
         public static OsmResponse Load(string path, Func<OsmGeo, bool> predicate)
@@ -92,10 +92,10 @@ namespace Kit.Osm
             var relations = geos.Where(i => i.Type == OsmGeoType.Relation)
                                 .ToDictionary(i => i.Id.GetValueOrDefault(), i => (Relation)i);
 
-            LogService.Log(
+            LogService.LogInfo(
                 $"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
 
-            LogService.Log("Complete"); //todo what?
+            LogService.LogInfo("Complete"); //todo what?
 
             return new OsmResponse
             {
@@ -168,13 +168,13 @@ namespace Kit.Osm
                                                .OrderBy(i => i).ToList();
 
                         if (missedNodeIds.Count == 0)
-                            LogService.Log(logMessage);
+                            LogService.LogInfo(logMessage);
                         else
                             LogService.LogWarning($"{logMessage} ({missedNodeIds.Count} missed)");
 
                         if (wayIds.Count == 0 && relationIds.Count == 0)
                         {
-                            LogService.Log("Loaded 0 ways");
+                            LogService.LogInfo("Loaded 0 ways");
                             break;
                         }
 
@@ -197,7 +197,7 @@ namespace Kit.Osm
                                              .OrderBy(i => i).ToList();
 
                         if (missedWayIds.Count == 0)
-                            LogService.Log(logMessage);
+                            LogService.LogInfo(logMessage);
                         else
                             LogService.LogWarning($"{logMessage} ({missedWayIds.Count} missed)");
 
@@ -225,12 +225,12 @@ namespace Kit.Osm
                                                .OrderBy(i => i).ToList();
 
                 if (missedRelationIds.Count == 0)
-                    LogService.Log(logMessage);
+                    LogService.LogInfo(logMessage);
                 else
                     LogService.LogWarning($"{logMessage} ({missedRelationIds.Count} missed)");
             }
 
-            LogService.Log("Complete"); //todo what?
+            LogService.LogInfo("Complete"); //todo what?
 
             return new OsmResponse
             {

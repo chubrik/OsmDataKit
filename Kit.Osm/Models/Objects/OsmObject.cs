@@ -5,7 +5,9 @@ using System.Diagnostics;
 
 namespace Kit.Osm
 {
+#if DEBUG
     [DebuggerDisplay("{" + nameof(DebugInfo) + "(),nq}")]
+#endif
     public abstract class OsmObject
     {
         public long Id { get; }

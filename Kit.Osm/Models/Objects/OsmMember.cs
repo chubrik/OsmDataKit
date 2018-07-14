@@ -3,7 +3,9 @@ using System.Diagnostics;
 
 namespace Kit.Osm
 {
+#if DEBUG
     [DebuggerDisplay("{" + nameof(DebugInfo) + "(),nq}")]
+#endif
     public class OsmMember
     {
         public string Role { get; }

@@ -32,7 +32,7 @@ namespace Kit.Osm
             if (!FileClient.Exists(path))
                 throw new InvalidOperationException();
 
-            LogService.Log("Load OSM response data");
+            LogService.LogInfo("Load OSM response data");
             var cacheStepPath = StepCachePath(cacheName, 1);
             OsmResponse response;
 
@@ -48,7 +48,7 @@ namespace Kit.Osm
                     RelationIds = new List<long> { relationId }
                 };
 
-                LogService.Log($"Step 1");
+                LogService.LogInfo($"Step 1");
                 response = OsmService.Load(path, request);
                 JsonFileClient.Write(cacheStepPath, response.ToData());
             }
@@ -85,7 +85,7 @@ namespace Kit.Osm
             if (!FileClient.Exists(path))
                 throw new InvalidOperationException();
 
-            LogService.Log("Load OSM response data");
+            LogService.LogInfo("Load OSM response data");
             var cacheStepPath = StepCachePath(cacheName, 1);
             OsmResponse response;
 
@@ -96,7 +96,7 @@ namespace Kit.Osm
             }
             else
             {
-                LogService.Log($"Step 1");
+                LogService.LogInfo($"Step 1");
                 response = OsmService.Load(path, predicate);
                 JsonFileClient.Write(cacheStepPath, response.ToData());
             }
@@ -121,7 +121,7 @@ namespace Kit.Osm
             response.MissedRelationIds =
                 response.MissedRelationIds.Distinct().OrderBy(i => i).ToList();
 
-            LogService.Log(
+            LogService.LogInfo(
                 $"Loaded: {response.Nodes.Count} nodes, " +
                 $"{response.Ways.Count} ways, " +
                 $"{response.Relations.Count} relations");
@@ -137,7 +137,7 @@ namespace Kit.Osm
             var data = response.ToData();
             JsonFileClient.Write(FullCachePath(cacheName), data);
             var objects = BuildObjects(data);
-            LogService.Log("Load OSM response data complete");
+            LogService.LogInfo("Load OSM response data complete");
             return objects;
         }
 
@@ -193,7 +193,7 @@ namespace Kit.Osm
                     RelationIds = nestedRelIds
                 };
 
-                LogService.Log($"Step {step}");
+                LogService.LogInfo($"Step {step}");
                 newResponse = OsmService.Load(path, request);
                 JsonFileClient.Write(cacheStepPath, newResponse.ToData());
             }
