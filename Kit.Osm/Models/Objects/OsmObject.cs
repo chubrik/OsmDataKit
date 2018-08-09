@@ -12,7 +12,7 @@ namespace Kit.Osm
     {
         public long Id { get; }
         public IReadOnlyDictionary<string, string> Tags { get; }
-        public Dictionary<string, string> Data = new Dictionary<string, string>();
+        public Dictionary<string, string> Data { get; } = new Dictionary<string, string>();
 
         public abstract OsmGeoType Type { get; }
         public abstract bool IsBroken { get; }

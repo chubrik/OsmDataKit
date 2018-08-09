@@ -8,7 +8,6 @@ namespace Kit.Osm
 {
     public class OsmRelation : OsmObject
     {
-        public IReadOnlyList<long> MemberIds { get; private set; }
         public IReadOnlyList<OsmMember> Members { get; internal set; }
 
         #region Extensions
@@ -25,6 +24,10 @@ namespace Kit.Osm
             Members.Where(i => i.Geo.Type == OsmGeoType.Relation)
                    .Select(i => (OsmRelation)i.Geo);
 
+        public IEnumerable<OsmNode> AllNodes =>
+            Nodes.Concat(Ways.SelectMany(i => i.Nodes))
+                 .Concat(Relations.SelectMany(i => i.AllNodes));
+
         #endregion
 
         #region Overrides
@@ -34,47 +37,24 @@ namespace Kit.Osm
         private bool? _isBroken;
 
         public override bool IsBroken =>
-            _isBroken ?? (_isBroken = MemberIds.Count != Members.Count || Members.Any(i => i.Geo.IsBroken)).Value;
+            _isBroken ?? (_isBroken = Members.Any(i => i.Geo.IsBroken)).Value;
 
         private GeoCoords _averageCoords;
 
         public override IGeoCoords AverageCoords =>
-            _averageCoords ?? (_averageCoords = GetAllNodes(this).AverageCoords());
-
-        private List<OsmNode> GetAllNodes(OsmRelation relation)
-        {
-            var nodes = relation.Nodes.Concat(relation.Ways.SelectMany(i => i.Nodes)).ToList();
-
-            foreach (var rel in relation.Relations)
-                nodes.AddRange(GetAllNodes(rel));
-
-            return nodes;
-        }
+            _averageCoords ?? (_averageCoords = AllNodes.ToList().AverageCoords());
 
         #endregion
 
         public void SetMembers(IReadOnlyList<OsmMember> members)
         {
             Debug.Assert(members != null);
-
-            if (members == null)
-                throw new ArgumentNullException(nameof(members));
-
-            MemberIds = members.Select(i => i.Geo.Id).ToList();
-            Members = members;
+            Members = members ?? throw new ArgumentNullException(nameof(members));
             _isBroken = null;
             _averageCoords = null;
         }
 
-        internal OsmRelation(RelationData data) : base(data)
-        {
-            Debug.Assert(data != null);
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            MemberIds = data.Members.Select(i => i.Id).ToList();
-        }
+        internal OsmRelation(RelationData data) : base(data) { }
 
         public OsmRelation(
             long id,

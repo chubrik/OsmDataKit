@@ -212,13 +212,13 @@ namespace Kit.Osm
             LogService.Log("Build geo objects");
 
             var allNodesDict =
-                data.Nodes.Select(i => new OsmNode(i)).ToDictionary(i => i.Id, i => i);
+                data.Nodes.Select(i => new OsmNode(i)).ToDictionary(i => i.Id);
 
             var allWaysDict =
-                data.Ways.Select(i => new OsmWay(i, allNodesDict)).ToDictionary(i => i.Id, i => i);
+                data.Ways.Select(i => new OsmWay(i, allNodesDict)).ToDictionary(i => i.Id);
 
             var allRelationsDict =
-                data.Relations.Select(i => new OsmRelation(i)).ToDictionary(i => i.Id, i => i);
+                data.Relations.Select(i => new OsmRelation(i)).ToDictionary(i => i.Id);
 
             foreach (var relationData in data.Relations)
             {
