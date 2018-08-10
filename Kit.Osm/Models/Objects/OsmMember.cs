@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Kit.Osm
 {
 #if DEBUG
-    [DebuggerDisplay("{" + nameof(DebugInfo) + "(),nq}")]
+    [DebuggerDisplay("{" + nameof(DebugInfo) + ",nq}")]
 #endif
     public class OsmMember
     {
@@ -40,7 +40,7 @@ namespace Kit.Osm
         }
 
 #if DEBUG
-        private string DebugInfo() =>
+        private string DebugInfo =>
             Geo.Type.ToString()[0] + Geo.Id.ToString() + " - " + Role + " - " + Geo.Title;
 #endif
     }

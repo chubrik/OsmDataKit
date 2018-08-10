@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace Kit.Osm
 {
 #if DEBUG
-    [DebuggerDisplay("{" + nameof(DebugInfo) + "(),nq}")]
+    [DebuggerDisplay("{" + nameof(DebugInfo) + ",nq}")]
 #endif
     public abstract class OsmObject
     {
@@ -17,6 +17,7 @@ namespace Kit.Osm
         public abstract OsmGeoType Type { get; }
         public abstract bool IsBroken { get; }
         public abstract IGeoCoords AverageCoords { get; }
+        public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
 
         #region Title
 
@@ -42,13 +43,17 @@ namespace Kit.Osm
 
                 return null;
             }
+            set {
+                _titleAssigned = true;
+                _title = value;
+            }
         }
 
         public bool HasTitle => Title != null;
 
         #endregion
 
-        // Was protected
+        // protected
         internal OsmObject(OsmGeoData data)
         {
             Debug.Assert(data != null);
@@ -75,7 +80,7 @@ namespace Kit.Osm
         }
 
 #if DEBUG
-        private string DebugInfo() =>
+        private string DebugInfo =>
             Type.ToString()[0] + Id.ToString() + " - " + Title;
 #endif
     }
