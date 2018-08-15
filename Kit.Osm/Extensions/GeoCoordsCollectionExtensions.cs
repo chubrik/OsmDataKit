@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Kit.Osm
 {
@@ -6,16 +7,11 @@ namespace Kit.Osm
     {
         public static GeoCoords AverageCoords(this IReadOnlyCollection<IGeoCoords> coordsColletion)
         {
-            var latitudeSum = 0d;
-            var longitudeSum = 0d;
-
-            foreach (var coords in coordsColletion)
-            {
-                latitudeSum += coords.Latitude;
-                longitudeSum += coords.Longitude;
-            }
-
-            return new GeoCoords(latitudeSum / coordsColletion.Count, longitudeSum / coordsColletion.Count);
+            var minLat = coordsColletion.Min(i => i.Latitude);
+            var maxLat = coordsColletion.Max(i => i.Latitude);
+            var minLong = coordsColletion.Min(i => i.Longitude);
+            var maxLong = coordsColletion.Max(i => i.Longitude);
+            return new GeoCoords((minLat + maxLat) / 2, (minLong + maxLong) / 2);
         }
     }
 }
