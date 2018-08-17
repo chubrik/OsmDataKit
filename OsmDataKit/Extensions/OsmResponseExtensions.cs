@@ -1,0 +1,19 @@
+﻿using OsmDataKit.Models;
+using System.Linq;
+
+namespace OsmDataKit.Extensions
+{
+    internal static class OsmResponseExtensions
+    {
+        public static OsmResponseData ToData(this OsmResponse response) =>
+            new OsmResponseData
+            {
+                Nodes = response.Nodes?.Values.Select(i => i.ToData()).ToList(),
+                Ways = response.Ways?.Values.Select(i => i.ToData()).ToList(),
+                Relations = response.Relations?.Values.Select(i => i.ToData()).ToList(),
+                MissedNodeIds = response.MissedNodeIds,
+                MissedWayIds = response.MissedWayIds,
+                MissedRelationIds = response.MissedRelationIds
+            };
+    }
+}
