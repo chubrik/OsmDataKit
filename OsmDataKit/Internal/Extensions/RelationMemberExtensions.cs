@@ -1,7 +1,6 @@
-﻿using OsmDataKit.Models;
-using OsmSharp;
+﻿using OsmSharp;
 
-namespace OsmDataKit.Extensions
+namespace OsmDataKit.Internal
 {
     internal static class RelationMemberExtensions
     {

@@ -2,14 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.5.0</Version>
+    <Version>1.6.0</Version>
     <PackageTags>osm openstreetmap data pbf</PackageTags>
     <Authors>Arkadi Chubrik</Authors>
     <Description>Complete OSM objects. It makes many requests to PBF, then it collects all the data and caches them.</Description>
     <PackageIconUrl>https://raw.githubusercontent.com/chubrik/OsmDataKit/master/OsmDataKit-logo.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/chubrik/OsmDataKit</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/chubrik/OsmDataKit/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Copyright>© 2018 Arkadi Chubrik</Copyright>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE" Pack="True" PackagePath="" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Kit.Json" Version="1.5.1" />

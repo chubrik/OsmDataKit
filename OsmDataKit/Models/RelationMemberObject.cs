@@ -1,18 +1,19 @@
 ﻿using Kit;
+using OsmDataKit.Internal;
 using System;
 using System.Diagnostics;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
 #if DEBUG
     [DebuggerDisplay("{" + nameof(DebugInfo) + ",nq}")]
 #endif
-    public class OsmMember
+    public class RelationMemberObject
     {
         public string Role { get; }
-        public OsmObject Geo { get; }
+        public GeoObject Geo { get; }
 
-        internal OsmMember(RelationMemberData data, OsmObject geo)
+        internal RelationMemberObject(RelationMemberData data, GeoObject geo)
         {
             Debug.Assert(data != null);
 
@@ -28,7 +29,7 @@ namespace OsmDataKit.Models
             Geo = geo;
         }
 
-        public OsmMember(string role, OsmObject geo)
+        public RelationMemberObject(string role, GeoObject geo)
         {
             Debug.Assert(!role.IsNullOrEmpty());
             Debug.Assert(geo != null);

@@ -1,4 +1,4 @@
-﻿namespace OsmDataKit.Models
+﻿namespace OsmDataKit
 {
     public interface IGeoCoords
     {

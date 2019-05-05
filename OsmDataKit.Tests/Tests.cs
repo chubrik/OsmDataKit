@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OsmDataKit.Services;
 using OsmSharp;
 
 namespace OsmDataKit.Tests
@@ -29,11 +28,11 @@ namespace OsmDataKit.Tests
 
             // https://www.openstreetmap.org/relation/2969204
             var title = "Vega Island";
-            var osmId = 2969204;
+            var relationId = 2969204;
 
-            var relation = OsmObjectService.LoadRelationObject(SrcPath, cacheName: title, relationId: osmId);
+            var relation = OsmObjectService.LoadRelationObject(SrcPath, cacheName: title, relationId: relationId);
             Assert.IsTrue(relation.Type == OsmGeoType.Relation);
-            Assert.IsTrue(relation.Id == osmId);
+            Assert.IsTrue(relation.Id == relationId);
             Assert.IsTrue(relation.Title == title);
             Assert.IsTrue(relation.Tags["type"] == "multipolygon");
             Assert.IsTrue(relation.Tags["place"] == "island");

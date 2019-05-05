@@ -1,17 +1,16 @@
 ﻿using Kit;
-using OsmDataKit.Models;
-using OsmDataKit.Extensions;
+using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace OsmDataKit.Services
+namespace OsmDataKit
 {
     public static class OsmObjectService
     {
-        public static OsmRelation LoadRelationObject(
+        public static RelationObject LoadRelationObject(
             string path, string cacheName, long relationId, int stepLimit = 0)
         {
             Debug.Assert(path != null);
@@ -215,17 +214,17 @@ namespace OsmDataKit.Services
             LogService.Log("Build geo objects");
 
             var allNodesDict =
-                data.Nodes.Select(i => new OsmNode(i)).ToDictionary(i => i.Id);
+                data.Nodes.Select(i => new NodeObject(i)).ToDictionary(i => i.Id);
 
             var allWaysDict =
-                data.Ways.Select(i => new OsmWay(i, allNodesDict)).ToDictionary(i => i.Id);
+                data.Ways.Select(i => new WayObject(i, allNodesDict)).ToDictionary(i => i.Id);
 
             var allRelationsDict =
-                data.Relations.Select(i => new OsmRelation(i)).ToDictionary(i => i.Id);
+                data.Relations.Select(i => new RelationObject(i)).ToDictionary(i => i.Id);
 
             foreach (var relationData in data.Relations)
             {
-                var members = new List<OsmMember>();
+                var members = new List<RelationMemberObject>();
 
                 foreach (var memberData in relationData.Members)
                 {
@@ -234,19 +233,19 @@ namespace OsmDataKit.Services
                         case OsmGeoType.Node:
                             if (allNodesDict.ContainsKey(memberData.Id))
                                 members.Add(
-                                    new OsmMember(memberData, allNodesDict[memberData.Id]));
+                                    new RelationMemberObject(memberData, allNodesDict[memberData.Id]));
                             break;
 
                         case OsmGeoType.Way:
                             if (allWaysDict.ContainsKey(memberData.Id))
                                 members.Add(
-                                    new OsmMember(memberData, allWaysDict[memberData.Id]));
+                                    new RelationMemberObject(memberData, allWaysDict[memberData.Id]));
                             break;
 
                         case OsmGeoType.Relation:
                             if (allRelationsDict.ContainsKey(memberData.Id))
                                 members.Add(
-                                    new OsmMember(memberData, allRelationsDict[memberData.Id]));
+                                    new RelationMemberObject(memberData, allRelationsDict[memberData.Id]));
                             break;
 
                         default:

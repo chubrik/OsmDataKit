@@ -1,16 +1,16 @@
-﻿using OsmDataKit.Extensions;
+﻿using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
-    public class OsmWay : OsmObject
+    public class WayObject : GeoObject
     {
         public IReadOnlyList<long> NodeIds { get; private set; }
-        public IReadOnlyList<OsmNode> Nodes { get; private set; }
+        public IReadOnlyList<NodeObject> Nodes { get; private set; }
 
         public override OsmGeoType Type => OsmGeoType.Way;
         public override bool IsBroken => NodeIds.Count != Nodes.Count;
@@ -20,7 +20,7 @@ namespace OsmDataKit.Models
         public override IGeoCoords AverageCoords =>
             _averageCoords ?? (_averageCoords = Nodes.AverageCoords());
 
-        public void SetNodes(IReadOnlyList<OsmNode> nodes)
+        public void SetNodes(IReadOnlyList<NodeObject> nodes)
         {
             Debug.Assert(nodes != null);
 
@@ -32,7 +32,7 @@ namespace OsmDataKit.Models
             _averageCoords = null;
         }
 
-        internal OsmWay(WayData data, IDictionary<long, OsmNode> allNodes) : base(data)
+        internal WayObject(WayData data, IDictionary<long, NodeObject> allNodes) : base(data)
         {
             Debug.Assert(data != null);
 
@@ -48,10 +48,10 @@ namespace OsmDataKit.Models
             Nodes = data.NodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList();
         }
 
-        public OsmWay(
+        public WayObject(
             long id,
             IReadOnlyDictionary<string, string> tags,
-            IReadOnlyList<OsmNode> nodes,
+            IReadOnlyList<NodeObject> nodes,
             IReadOnlyDictionary<string, string> data = null)
             : base(id, tags, data)
         {

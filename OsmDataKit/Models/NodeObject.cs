@@ -1,11 +1,12 @@
-﻿using OsmSharp;
+﻿using OsmDataKit.Internal;
+using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
-    public class OsmNode : OsmObject, IGeoCoords
+    public class NodeObject : GeoObject, IGeoCoords
     {
         public double Latitude { get; }
         public double Longitude { get; }
@@ -14,7 +15,7 @@ namespace OsmDataKit.Models
         public override bool IsBroken => false;
         public override IGeoCoords AverageCoords => this;
 
-        internal OsmNode(NodeData data) : base(data)
+        internal NodeObject(NodeData data) : base(data)
         {
             Debug.Assert(data?.Coords?.Length == 2);
 
@@ -25,7 +26,7 @@ namespace OsmDataKit.Models
             Longitude = data.Coords[1];
         }
 
-        public OsmNode(
+        public NodeObject(
             long id, IReadOnlyDictionary<string, string> tags,
             IGeoCoords coords,
             IReadOnlyDictionary<string, string> data = null)

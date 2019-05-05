@@ -1,7 +1,6 @@
-﻿using OsmDataKit.Models;
-using System.Linq;
+﻿using System.Linq;
 
-namespace OsmDataKit.Extensions
+namespace OsmDataKit.Internal
 {
     internal static class OsmResponseExtensions
     {

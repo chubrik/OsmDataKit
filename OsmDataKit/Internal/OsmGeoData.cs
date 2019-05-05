@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit.Internal
 {
     [JsonObject]
     internal abstract class OsmGeoData

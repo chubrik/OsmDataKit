@@ -1,8 +1,7 @@
-﻿using OsmDataKit.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace OsmDataKit.Extensions
+namespace OsmDataKit
 {
     public static class GeoCoordsCollectionExtensions
     {

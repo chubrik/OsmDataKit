@@ -1,15 +1,16 @@
 ﻿using Kit;
+using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
 #if DEBUG
     [DebuggerDisplay("{" + nameof(DebugInfo) + ",nq}")]
 #endif
-    public abstract class OsmObject
+    public abstract class GeoObject
     {
         public long Id { get; }
         public IReadOnlyDictionary<string, string> Tags { get; }
@@ -55,7 +56,7 @@ namespace OsmDataKit.Models
         #endregion
 
         // protected
-        internal OsmObject(OsmGeoData data)
+        internal GeoObject(OsmGeoData data)
         {
             Debug.Assert(data != null);
 
@@ -66,7 +67,7 @@ namespace OsmDataKit.Models
             Tags = data.Tags;
         }
 
-        protected OsmObject(
+        protected GeoObject(
             long id,
             IReadOnlyDictionary<string, string> tags,
             IReadOnlyDictionary<string, string> data)

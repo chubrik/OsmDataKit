@@ -1,11 +1,12 @@
-﻿using OsmSharp;
+﻿using OsmDataKit.Internal;
+using OsmSharp;
 using OsmSharp.Tags;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
     public class OsmResponse
     {

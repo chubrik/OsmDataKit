@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
     public class OsmRequest
     {

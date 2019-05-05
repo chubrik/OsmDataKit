@@ -1,10 +1,9 @@
-﻿using OsmDataKit.Models;
-using OsmSharp;
+﻿using OsmSharp;
 using System;
 using System.Diagnostics;
 using System.Linq;
 
-namespace OsmDataKit.Extensions
+namespace OsmDataKit.Internal
 {
     internal static class RelationExtensions
     {

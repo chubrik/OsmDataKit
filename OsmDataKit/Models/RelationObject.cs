@@ -1,31 +1,31 @@
-﻿using OsmDataKit.Extensions;
+﻿using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit
 {
-    public class OsmRelation : OsmObject
+    public class RelationObject : GeoObject
     {
-        public IReadOnlyList<OsmMember> Members { get; internal set; }
+        public IReadOnlyList<RelationMemberObject> Members { get; internal set; }
 
         #region Extensions
 
-        public IEnumerable<OsmNode> Nodes =>
+        public IEnumerable<NodeObject> Nodes =>
             Members.Where(i => i.Geo.Type == OsmGeoType.Node)
-                   .Select(i => (OsmNode)i.Geo);
+                   .Select(i => (NodeObject)i.Geo);
 
-        public IEnumerable<OsmWay> Ways =>
+        public IEnumerable<WayObject> Ways =>
             Members.Where(i => i.Geo.Type == OsmGeoType.Way)
-                   .Select(i => (OsmWay)i.Geo);
+                   .Select(i => (WayObject)i.Geo);
 
-        public IEnumerable<OsmRelation> Relations =>
+        public IEnumerable<RelationObject> Relations =>
             Members.Where(i => i.Geo.Type == OsmGeoType.Relation)
-                   .Select(i => (OsmRelation)i.Geo);
+                   .Select(i => (RelationObject)i.Geo);
 
-        public IEnumerable<OsmNode> AllNodes =>
+        public IEnumerable<NodeObject> AllNodes =>
             Nodes.Concat(Ways.SelectMany(i => i.Nodes))
                  .Concat(Relations.SelectMany(i => i.AllNodes));
 
@@ -47,7 +47,7 @@ namespace OsmDataKit.Models
 
         #endregion
 
-        public void SetMembers(IReadOnlyList<OsmMember> members)
+        public void SetMembers(IReadOnlyList<RelationMemberObject> members)
         {
             Debug.Assert(members != null);
             Members = members ?? throw new ArgumentNullException(nameof(members));
@@ -55,12 +55,12 @@ namespace OsmDataKit.Models
             _averageCoords = null;
         }
 
-        internal OsmRelation(RelationData data) : base(data) { }
+        internal RelationObject(RelationData data) : base(data) { }
 
-        public OsmRelation(
+        public RelationObject(
             long id,
             IReadOnlyDictionary<string, string> tags,
-            IReadOnlyList<OsmMember> members,
+            IReadOnlyList<RelationMemberObject> members,
             IReadOnlyDictionary<string, string> data = null)
             : base(id, tags, data)
         {

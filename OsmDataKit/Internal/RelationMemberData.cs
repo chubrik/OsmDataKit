@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OsmSharp;
 
-namespace OsmDataKit.Models
+namespace OsmDataKit.Internal
 {
     [JsonObject]
     internal class RelationMemberData

@@ -1,5 +1,4 @@
 ﻿using Kit;
-using OsmDataKit.Models;
 using OsmSharp;
 using OsmSharp.Streams;
 using System;
@@ -7,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace OsmDataKit.Services
+namespace OsmDataKit
 {
     public static class OsmService
     {
@@ -82,7 +81,7 @@ namespace OsmDataKit.Services
             using (var fileStream = FileClient.OpenRead(path))
             {
                 var source = new PBFOsmStreamSource(fileStream);
-                geos = source.Where(predicate).ToList(); // ToList() should be there!
+                geos = source.Where(predicate).ToList();
             }
 
             var nodes = geos.Where(i => i.Type == OsmGeoType.Node)
@@ -97,7 +96,7 @@ namespace OsmDataKit.Services
             LogService.LogInfo(
                 $"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
 
-            LogService.LogInfo("Complete"); //todo what?
+            LogService.LogInfo("Complete");
 
             return new OsmResponse
             {
@@ -232,7 +231,7 @@ namespace OsmDataKit.Services
                     LogService.LogWarning($"{logMessage} ({missedRelationIds.Count} missed)");
             }
 
-            LogService.LogInfo("Complete"); //todo what?
+            LogService.LogInfo("Complete");
 
             return new OsmResponse
             {
