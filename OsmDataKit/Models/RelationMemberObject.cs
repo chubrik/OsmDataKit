@@ -1,5 +1,4 @@
 ﻿using Kit;
-using OsmDataKit.Internal;
 using System;
 using System.Diagnostics;
 
@@ -12,22 +11,6 @@ namespace OsmDataKit
     {
         public string Role { get; }
         public GeoObject Geo { get; }
-
-        internal RelationMemberObject(RelationMemberData data, GeoObject geo)
-        {
-            Debug.Assert(data != null);
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            Debug.Assert(geo?.Type == data.Type);
-
-            if (geo.Type != data.Type)
-                throw new ArgumentException(nameof(geo));
-
-            Role = data.Role;
-            Geo = geo;
-        }
 
         public RelationMemberObject(string role, GeoObject geo)
         {

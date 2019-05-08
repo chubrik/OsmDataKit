@@ -1,5 +1,4 @@
-﻿using OsmDataKit.Internal;
-using OsmSharp;
+﻿using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +8,7 @@ namespace OsmDataKit
 {
     public class WayObject : GeoObject
     {
+        //todo nodeIds?
         public IReadOnlyList<long> NodeIds { get; private set; }
         public IReadOnlyList<NodeObject> Nodes { get; private set; }
 
@@ -32,27 +32,11 @@ namespace OsmDataKit
             _averageCoords = null;
         }
 
-        internal WayObject(WayData data, IDictionary<long, NodeObject> allNodes) : base(data)
-        {
-            Debug.Assert(data != null);
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            Debug.Assert(allNodes != null);
-
-            if (allNodes == null)
-                throw new ArgumentNullException(nameof(allNodes));
-
-            NodeIds = data.NodeIds;
-            Nodes = data.NodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList();
-        }
-
         public WayObject(
             long id,
-            IReadOnlyDictionary<string, string> tags,
             IReadOnlyList<NodeObject> nodes,
-            IReadOnlyDictionary<string, string> data = null)
+            IReadOnlyDictionary<string, string> tags = null,
+            Dictionary<string, string> data = null)
             : base(id, tags, data)
         {
             Debug.Assert(nodes != null);

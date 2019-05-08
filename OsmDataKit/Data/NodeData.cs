@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace OsmDataKit.Internal
+namespace OsmDataKit.Data
 {
     [JsonObject]
     internal class NodeData : OsmGeoData

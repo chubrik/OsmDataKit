@@ -1,7 +1,5 @@
 ﻿using Kit;
-using OsmDataKit.Internal;
 using OsmSharp;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -13,8 +11,10 @@ namespace OsmDataKit
     public abstract class GeoObject
     {
         public long Id { get; }
+
+        //todo tags & data
         public IReadOnlyDictionary<string, string> Tags { get; }
-        public Dictionary<string, string> Data { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Data { get; }
 
         public abstract OsmGeoType Type { get; }
         public abstract bool IsBroken { get; }
@@ -30,7 +30,8 @@ namespace OsmDataKit
 
         public string Title
         {
-            get {
+            get
+            {
                 if (_titleAssigned)
                     return _title;
 
@@ -45,7 +46,8 @@ namespace OsmDataKit
 
                 return null;
             }
-            set {
+            set
+            {
                 _titleAssigned = true;
                 _title = value;
             }
@@ -55,30 +57,14 @@ namespace OsmDataKit
 
         #endregion
 
-        // protected
-        internal GeoObject(OsmGeoData data)
-        {
-            Debug.Assert(data != null);
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            Id = data.Id;
-            Tags = data.Tags;
-        }
-
         protected GeoObject(
             long id,
             IReadOnlyDictionary<string, string> tags,
-            IReadOnlyDictionary<string, string> data)
+            Dictionary<string, string> data)
         {
-            Debug.Assert(tags != null);
-
             Id = id;
-            Tags = tags ?? throw new ArgumentNullException(nameof(tags));
-
-            if (data != null)
-                Data.AddRange(data);
+            Tags = tags;
+            Data = data;
         }
 
 #if DEBUG

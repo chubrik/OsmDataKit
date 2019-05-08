@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace OsmDataKit.Internal
+namespace OsmDataKit.Data
 {
     [JsonObject]
     internal abstract class OsmGeoData
@@ -9,7 +9,7 @@ namespace OsmDataKit.Internal
         [JsonProperty("i")]
         public long Id { get; set; }
 
-        [JsonProperty("g")]
+        [JsonProperty("g", NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string, string> Tags { get; set; }
     }
 }

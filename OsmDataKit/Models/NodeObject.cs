@@ -1,5 +1,4 @@
-﻿using OsmDataKit.Internal;
-using OsmSharp;
+﻿using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,30 +14,23 @@ namespace OsmDataKit
         public override bool IsBroken => false;
         public override IGeoCoords AverageCoords => this;
 
-        internal NodeObject(NodeData data) : base(data)
-        {
-            Debug.Assert(data?.Coords?.Length == 2);
-
-            if (data?.Coords?.Length != 2)
-                throw new ArgumentException(nameof(data));
-
-            Latitude = data.Coords[0];
-            Longitude = data.Coords[1];
-        }
-
         public NodeObject(
-            long id, IReadOnlyDictionary<string, string> tags,
-            IGeoCoords coords,
-            IReadOnlyDictionary<string, string> data = null)
+            long id, double latitude, double longitude,
+            IReadOnlyDictionary<string, string> tags = null,
+            Dictionary<string, string> data = null)
             : base(id, tags, data)
         {
-            Debug.Assert(coords != null);
+            Debug.Assert(latitude >= -90 && latitude <= 90);
+            Debug.Assert(longitude >= -180 && longitude <= 180);
 
-            if (coords == null)
-                throw new ArgumentNullException(nameof(coords));
+            if (latitude < -90 || latitude > 90)
+                throw new ArgumentOutOfRangeException(nameof(latitude));
 
-            Latitude = coords.Latitude;
-            Longitude = coords.Longitude;
+            if (longitude < -180 || longitude > 180)
+                throw new ArgumentOutOfRangeException(nameof(longitude));
+
+            Latitude = latitude;
+            Longitude = longitude;
         }
     }
 }

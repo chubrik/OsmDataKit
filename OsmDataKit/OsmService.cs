@@ -67,11 +67,10 @@ namespace OsmDataKit
         public static OsmResponse Load(string path, Func<OsmGeo, bool> predicate)
         {
             Debug.Assert(path != null);
+            Debug.Assert(predicate != null);
 
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-
-            Debug.Assert(predicate != null);
 
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -93,9 +92,7 @@ namespace OsmDataKit
             var relations = geos.Where(i => i.Type == OsmGeoType.Relation)
                                 .ToDictionary(i => i.Id.GetValueOrDefault(), i => (Relation)i);
 
-            LogService.LogInfo(
-                $"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
-
+            LogService.LogInfo($"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
             LogService.LogInfo("Complete");
 
             return new OsmResponse
@@ -112,11 +109,10 @@ namespace OsmDataKit
         public static OsmResponse Load(string path, OsmRequest request)
         {
             Debug.Assert(path != null);
+            Debug.Assert(request != null);
 
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-
-            Debug.Assert(request != null);
 
             if (request == null)
                 throw new ArgumentNullException(nameof(request));

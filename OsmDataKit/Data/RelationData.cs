@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace OsmDataKit.Internal
+namespace OsmDataKit.Data
 {
     [JsonObject]
     internal class RelationData : OsmGeoData
