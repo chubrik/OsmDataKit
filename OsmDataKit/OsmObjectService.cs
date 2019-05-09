@@ -219,15 +219,15 @@ namespace OsmDataKit
             }
 
             var wayNodeIds = allWaysDict.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
-            var relNodeIds = allRelationsDict.Values.SelectMany(i => i.Nodes()).Select(i => i.Id);
+            var relNodeIds = allRelationsDict.Values.SelectMany(i => i.GetNodes()).Select(i => i.Id);
             var memberNodeIds = new HashSet<long>(wayNodeIds.Concat(relNodeIds));
-            var memberWayIds = new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Ways()).Select(i => i.Id));
-            var memberRelationIds = new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.Relations()).Select(i => i.Id));
+            var memberWayIds = new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.GetWays()).Select(i => i.Id));
+            var memberRelationIds = new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.GetRelations()).Select(i => i.Id));
             var rootNodes = allNodesDict.Values.Where(i => !memberNodeIds.Contains(i.Id)).ToList();
             var rootWays = allWaysDict.Values.Where(i => !memberWayIds.Contains(i.Id)).ToList();
             var rootRelations = allRelationsDict.Values.Where(i => !memberRelationIds.Contains(i.Id)).ToList();
 
-            var validRootNodes = rootNodes.Where(i => !i.IsBroken && i.HasTitle).ToList();
+            var validRootNodes = rootNodes.Where(i => i.HasTitle).ToList();
             var validRootWays = rootWays.Where(i => !i.IsBroken && i.HasTitle).ToList();
             var validRootRelations = rootRelations.Where(i => !i.IsBroken && i.HasTitle).ToList();
             var brokenRootWays = rootWays.Where(i => i.IsBroken).ToList();

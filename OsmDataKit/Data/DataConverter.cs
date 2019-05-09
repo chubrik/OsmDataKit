@@ -133,12 +133,6 @@ namespace OsmDataKit.Data
             Debug.Assert(data != null);
             Debug.Assert(data?.Coords?.Length == 2);
 
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (data.Coords?.Length != 2)
-                throw new ArgumentException(nameof(data));
-
             return new NodeObject(
                 id: data.Id,
                 latitude: data.Coords[0],
@@ -151,12 +145,6 @@ namespace OsmDataKit.Data
             Debug.Assert(data != null);
             Debug.Assert(allNodes != null);
 
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (allNodes == null)
-                throw new ArgumentNullException(nameof(allNodes));
-
             return new WayObject(
                 id: data.Id,
                 nodes: data.NodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList(),
@@ -166,9 +154,6 @@ namespace OsmDataKit.Data
         public static RelationObject ToObject(RelationData data)
         {
             Debug.Assert(data != null);
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
 
             return new RelationObject(
                 id: data.Id,
@@ -180,15 +165,6 @@ namespace OsmDataKit.Data
             Debug.Assert(data != null);
             Debug.Assert(geo != null);
             Debug.Assert(geo?.Type == data.Type);
-
-            if (data == null)
-                throw new ArgumentNullException(nameof(data));
-
-            if (geo == null)
-                throw new ArgumentNullException(nameof(geo));
-
-            if (geo.Type != data.Type)
-                throw new ArgumentException(nameof(geo));
 
             return new RelationMemberObject(
                 role: data.Role,

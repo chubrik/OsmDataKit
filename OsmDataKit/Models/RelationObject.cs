@@ -2,33 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace OsmDataKit
 {
     public class RelationObject : GeoObject
     {
-        public IReadOnlyList<RelationMemberObject> Members { get; internal set; }
-
         public override OsmGeoType Type => OsmGeoType.Relation;
 
-        private bool? _isBroken;
-
-        public override bool IsBroken =>
-            _isBroken ?? (_isBroken = Members.Any(i => i.Geo.IsBroken)).Value;
-
-        private GeoCoords _averageCoords;
-
-        public override IGeoCoords AverageCoords =>
-            _averageCoords ?? (_averageCoords = this.GetAllNodes().ToList().AverageCoords());
-
-        public void SetMembers(IReadOnlyList<RelationMemberObject> members)
-        {
-            Debug.Assert(members != null);
-            Members = members ?? throw new ArgumentNullException(nameof(members));
-            _isBroken = null;
-            _averageCoords = null;
-        }
+        public IReadOnlyList<RelationMemberObject> Members { get; internal set; }
 
         //todo internat ctor
         internal RelationObject(
@@ -44,6 +25,17 @@ namespace OsmDataKit
             : base(id, tags, data)
         {
             SetMembers(members);
+        }
+
+        private bool? _isBroken;
+        public bool IsBroken => _isBroken ?? (_isBroken = this.GetIsBroken()).Value;
+
+        public void SetMembers(IReadOnlyList<RelationMemberObject> members)
+        {
+            Debug.Assert(members?.Count > 0);
+
+            Members = members ?? throw new ArgumentNullException(nameof(members));
+            _isBroken = null;
         }
     }
 }

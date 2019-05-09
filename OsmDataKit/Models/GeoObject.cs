@@ -11,15 +11,29 @@ namespace OsmDataKit
     public abstract class GeoObject
     {
         public long Id { get; }
-
-        //todo tags & data
-        public IReadOnlyDictionary<string, string> Tags { get; }
-        public Dictionary<string, string> Data { get; }
-
         public abstract OsmGeoType Type { get; }
-        public abstract bool IsBroken { get; }
-        public abstract IGeoCoords AverageCoords { get; }
-        public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
+
+        private IReadOnlyDictionary<string, string> _tags;
+        public IReadOnlyDictionary<string, string> Tags => _tags ?? (_tags = new Dictionary<string, string>(0));
+
+        private Dictionary<string, string> _data;
+        public Dictionary<string, string> Data => _data ?? (_data = new Dictionary<string, string>(0));
+
+        protected GeoObject(
+            long id,
+            IReadOnlyDictionary<string, string> tags,
+            Dictionary<string, string> data)
+        {
+            Debug.Assert(id > 0);
+
+            Id = id;
+
+            if (tags?.Count > 0)
+                _tags = tags;
+
+            if (data?.Count > 0)
+                _data = data;
+        }
 
         #region Title
 
@@ -37,12 +51,10 @@ namespace OsmDataKit
 
                 _titleAssigned = true;
 
-                if (Tags.Count == 0)
-                    return null;
-
-                foreach (var tagName in _tagNames)
-                    if (Tags.TryGetValue(tagName, out var title) && !title.IsNullOrWhiteSpace())
-                        return _title = title.Trim();
+                if (_tags != null)
+                    foreach (var tagName in _tagNames)
+                        if (Tags.TryGetValue(tagName, out var title) && !title.IsNullOrWhiteSpace())
+                            return _title = title.Trim();
 
                 return null;
             }
@@ -57,15 +69,7 @@ namespace OsmDataKit
 
         #endregion
 
-        protected GeoObject(
-            long id,
-            IReadOnlyDictionary<string, string> tags,
-            Dictionary<string, string> data)
-        {
-            Id = id;
-            Tags = tags;
-            Data = data;
-        }
+        public string SourceUrl => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
 
 #if DEBUG
         private string DebugInfo =>

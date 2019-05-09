@@ -1,4 +1,4 @@
-﻿using OsmSharp;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,20 +6,48 @@ namespace OsmDataKit
 {
     public static class RelationObjectExtensions
     {
-        public static IEnumerable<NodeObject> Nodes(this RelationObject relation) =>
-            relation.Members.Where(i => i.Geo.Type == OsmGeoType.Node)
-                            .Select(i => (NodeObject)i.Geo);
+        public static IEnumerable<NodeObject> GetNodes(this RelationObject relation) =>
+            relation.Members.GetNodes();
 
-        public static IEnumerable<WayObject> Ways(this RelationObject relation) =>
-            relation.Members.Where(i => i.Geo.Type == OsmGeoType.Way)
-                            .Select(i => (WayObject)i.Geo);
+        public static IEnumerable<WayObject> GetWays(this RelationObject relation) =>
+            relation.Members.GetWays();
 
-        public static IEnumerable<RelationObject> Relations(this RelationObject relation) =>
-            relation.Members.Where(i => i.Geo.Type == OsmGeoType.Relation)
-                            .Select(i => (RelationObject)i.Geo);
+        public static IEnumerable<RelationObject> GetRelations(this RelationObject relation) =>
+            relation.Members.GetRelations();
 
-        public static IEnumerable<NodeObject> GetAllNodes(this RelationObject relation) =>
-            relation.Nodes().Concat(relation.Ways().SelectMany(i => i.Nodes))
-                            .Concat(relation.Relations().SelectMany(i => i.GetAllNodes()));
+        public static IEnumerable<NodeObject> GetAllNestedNodes(this RelationObject relation) =>
+            relation.GetNodes().Concat(relation.GetWays().SelectMany(i => i.Nodes))
+                               .Concat(relation.GetRelations().SelectMany(i => i.GetAllNestedNodes()));
+
+        internal static bool GetIsBroken(this RelationObject relation)
+        {
+            foreach (var member in relation.Members)
+            {
+                switch (member.Geo)
+                {
+                    case NodeObject node:
+                        break;
+
+                    case WayObject way:
+
+                        if (way.IsBroken)
+                            return true;
+
+                        break;
+
+                    case RelationObject rel:
+
+                        if (rel.GetIsBroken())
+                            return true;
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(member));
+                }
+            }
+
+            return false;
+        }
     }
 }

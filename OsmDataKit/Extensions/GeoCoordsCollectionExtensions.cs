@@ -5,13 +5,15 @@ namespace OsmDataKit
 {
     public static class GeoCoordsCollectionExtensions
     {
-        public static GeoCoords AverageCoords(this IReadOnlyCollection<IGeoCoords> coordsColletion)
+        public static GeoCoords AverageCoords(this IEnumerable<IGeoCoords> coordsColletion)
         {
-            var minLat = coordsColletion.Min(i => i.Latitude);
-            var maxLat = coordsColletion.Max(i => i.Latitude);
-            var minLong = coordsColletion.Min(i => i.Longitude);
-            var maxLong = coordsColletion.Max(i => i.Longitude);
-            return new GeoCoords((minLat + maxLat) / 2, (minLong + maxLong) / 2);
+            //todo AverageCoords
+            var coordsList = coordsColletion.ToList();
+            var minLat2 = coordsList.Min(i => i.Latitude);
+            var maxLat2 = coordsList.Max(i => i.Latitude);
+            var minLong = coordsList.Min(i => i.Longitude);
+            var maxLong = coordsList.Max(i => i.Longitude);
+            return new GeoCoords((minLat2 + maxLat2) / 2, (minLong + maxLong) / 2);
         }
     }
 }
