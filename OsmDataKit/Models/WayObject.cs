@@ -10,40 +10,50 @@ namespace OsmDataKit
     {
         public override OsmGeoType Type => OsmGeoType.Way;
 
-        //todo nodeIds?
-        public IReadOnlyList<long> NodeIds { get; private set; }
         public IReadOnlyList<NodeObject> Nodes { get; private set; }
 
-        public WayObject(
-            long id,
-            IReadOnlyList<NodeObject> nodes,
-            IReadOnlyDictionary<string, string> tags = null,
-            Dictionary<string, string> data = null)
-            : base(id, tags, data)
+        public IReadOnlyList<long> MissedNodeIds { get; private set; }
+
+        internal WayObject(Way way) : base(way)
         {
-            Debug.Assert(nodes?.Count > 0);
-
-            if (nodes == null)
-                throw new ArgumentNullException(nameof(nodes));
-
-            if (nodes.Count == 0)
-                throw new ArgumentException(nameof(nodes));
-
-            NodeIds = nodes.Select(i => i.Id).ToList();
-            Nodes = nodes;
+            MissedNodeIds = way.Nodes;
         }
 
-        public bool IsBroken => NodeIds.Count != Nodes.Count;
+        internal bool HasMissedNodes => MissedNodeIds?.Count > 0;
 
-        public void SetNodes(IReadOnlyList<NodeObject> nodes)
+        //public WayObject(
+        //    long id,
+        //    IReadOnlyList<NodeObject> nodes,
+        //    IReadOnlyDictionary<string, string> tags = null,
+        //    Dictionary<string, string> data = null)
+        //    : base(id, tags, data)
+        //{
+        //    Debug.Assert(nodes?.Count > 0);
+
+        //    if (nodes == null)
+        //        throw new ArgumentNullException(nameof(nodes));
+
+        //    if (nodes.Count == 0)
+        //        throw new ArgumentException(nameof(nodes));
+
+        //    NodeIds = nodes.Select(i => i.Id).ToList();
+        //    Nodes = nodes;
+        //}
+
+        //public bool IsBroken => NodeIds.Count != Nodes.Count;
+
+        internal void SetNodes(IReadOnlyList<NodeObject> nodes)
         {
-            Debug.Assert(nodes != null);
+            Debug.Assert(nodes?.Count > 0);
+            Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
 
-            if (nodes == null)
-                throw new ArgumentNullException(nameof(nodes));
+            var missedSet = new HashSet<long>(MissedNodeIds);
 
-            NodeIds = nodes.Select(i => i.Id).ToList();
-            Nodes = nodes;
+            foreach (var node in nodes)
+                if (!missedSet.Remove(node.Id))
+                    throw new InvalidOperationException();
+
+            MissedNodeIds = missedSet.Count > 0 ? missedSet.ToList() : null;
         }
     }
 }

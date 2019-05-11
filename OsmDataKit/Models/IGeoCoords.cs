@@ -2,7 +2,7 @@
 {
     public interface IGeoCoords
     {
-        double Latitude { get; }
-        double Longitude { get; }
+        float Latitude { get; }
+        float Longitude { get; }
     }
 }

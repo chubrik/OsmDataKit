@@ -138,7 +138,7 @@ namespace OsmDataKit
             }
             else
             {
-                var wayNodeIds = response.Ways.Values.SelectMany(i => i.Nodes);
+                var wayNodeIds = response.Ways.Values.SelectMany(i => i.MissedNodeIds);
                 var relMembers = response.Relations.Values.SelectMany(i => i.Members).ToList();
                 var relNodeIds = relMembers.Where(i => i.Type == OsmGeoType.Node).Select(i => i.Id);
                 var relWayIds = relMembers.Where(i => i.Type == OsmGeoType.Way).Select(i => i.Id);
@@ -176,73 +176,75 @@ namespace OsmDataKit
             return true;
         }
 
-        private static OsmObjectResponse BuildObjects(OsmResponseData data)
+        private static OsmObjectResponse BuildObjects(OsmResponse response)
         {
             LogService.Log("Build geo objects");
-            var allNodesDict = data.Nodes.Select(DataConverter.ToObject).ToDictionary(i => i.Id);
-            var allWaysDict = data.Ways.Select(i => DataConverter.ToObject(i, allNodesDict)).ToDictionary(i => i.Id);
-            var allRelationsDict = data.Relations.Select(DataConverter.ToObject).ToDictionary(i => i.Id);
+            var allNodes = response.Nodes;
+            var allWays = response.Ways;
+            var allRelations = response.Relations;
 
-            foreach (var relationData in data.Relations)
+            foreach (var way in allWays.Values)
+            {
+                var nodes = way.MissedNodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList();
+                way.SetNodes(nodes);
+            }
+
+            foreach (var relation in allRelations.Values)
             {
                 var members = new List<RelationMemberObject>();
 
-                foreach (var memberData in relationData.Members)
-                    switch (memberData.Type)
+                foreach (var memberInfo in relation.MissedMembersInfo)
+                    switch (memberInfo.Type)
                     {
                         case OsmGeoType.Node:
 
-                            if (allNodesDict.ContainsKey(memberData.Id))
-                                members.Add(DataConverter.ToObject(memberData, allNodesDict[memberData.Id]));
+                            if (allNodes.ContainsKey(memberInfo.Id))
+                                members.Add(new RelationMemberObject(memberInfo.Role, allNodes[memberInfo.Id]));
 
                             break;
 
                         case OsmGeoType.Way:
 
-                            if (allWaysDict.ContainsKey(memberData.Id))
-                                members.Add(DataConverter.ToObject(memberData, allWaysDict[memberData.Id]));
+                            if (allWays.ContainsKey(memberInfo.Id))
+                                members.Add(new RelationMemberObject(memberInfo.Role, allWays[memberInfo.Id]));
 
                             break;
 
                         case OsmGeoType.Relation:
 
-                            if (allRelationsDict.ContainsKey(memberData.Id))
-                                members.Add(DataConverter.ToObject(memberData, allRelationsDict[memberData.Id]));
+                            if (allRelations.ContainsKey(memberInfo.Id))
+                                members.Add(new RelationMemberObject(memberInfo.Role, allRelations[memberInfo.Id]));
 
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(memberData.Type));
+                            throw new ArgumentOutOfRangeException(nameof(memberInfo.Type));
                     }
 
-                allRelationsDict[relationData.Id].Members = members;
+                allRelations[relation.Id].SetMembers(members);
             }
 
-            var wayNodeIds = allWaysDict.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
-            var relNodeIds = allRelationsDict.Values.SelectMany(i => i.GetNodes()).Select(i => i.Id);
+            var wayNodeIds = allWays.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
+            var relNodeIds = allRelations.Values.SelectMany(i => i.Members.Nodes()).Select(i => i.Id);
             var memberNodeIds = new HashSet<long>(wayNodeIds.Concat(relNodeIds));
-            var memberWayIds = new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.GetWays()).Select(i => i.Id));
-            var memberRelationIds = new HashSet<long>(allRelationsDict.Values.SelectMany(i => i.GetRelations()).Select(i => i.Id));
-            var rootNodes = allNodesDict.Values.Where(i => !memberNodeIds.Contains(i.Id)).ToList();
-            var rootWays = allWaysDict.Values.Where(i => !memberWayIds.Contains(i.Id)).ToList();
-            var rootRelations = allRelationsDict.Values.Where(i => !memberRelationIds.Contains(i.Id)).ToList();
+            var memberWayIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Ways()).Select(i => i.Id));
+            var memberRelationIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Relations()).Select(i => i.Id));
+            var rootNodes = allNodes.Values.Where(i => !memberNodeIds.Contains(i.Id)).ToList();
+            var rootWays = allWays.Values.Where(i => !memberWayIds.Contains(i.Id)).ToList();
+            var rootRelations = allRelations.Values.Where(i => !memberRelationIds.Contains(i.Id)).ToList();
 
-            var validRootNodes = rootNodes.Where(i => i.HasTitle).ToList();
-            var validRootWays = rootWays.Where(i => !i.IsBroken && i.HasTitle).ToList();
-            var validRootRelations = rootRelations.Where(i => !i.IsBroken && i.HasTitle).ToList();
-            var brokenRootWays = rootWays.Where(i => i.IsBroken).ToList();
-            var brokenRootRelations = rootRelations.Where(i => i.IsBroken).ToList();
+            var validRootWays = rootWays.Where(i => !i.HasMissedNodes).ToList();
+            var validRootRelations = rootRelations.Where(i => !i.HasMissedParts()).ToList();
+            var brokenRootWays = rootWays.Where(i => i.HasMissedNodes).ToList();
+            var brokenRootRelations = rootRelations.Where(i => i.HasMissedParts()).ToList();
 
             return new OsmObjectResponse
             {
-                Nodes = validRootNodes,
+                Nodes = rootNodes,
                 Ways = validRootWays,
                 Relations = validRootRelations,
                 BrokenWays = brokenRootWays,
-                BrokenRelations = brokenRootRelations,
-                AllNodesDict = allNodesDict,
-                AllWaysDict = allWaysDict,
-                AllRelationsDict = allRelationsDict
+                BrokenRelations = brokenRootRelations
             };
         }
 

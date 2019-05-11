@@ -15,7 +15,7 @@ namespace OsmDataKit
                     return way.Nodes.AverageCoords();
 
                 case RelationObject relation:
-                    return relation.GetAllNestedNodes().AverageCoords();
+                    return relation.GetAllNodes().AverageCoords();
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(geo));

@@ -75,17 +75,34 @@ namespace OsmDataKit
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            List<OsmGeo> geos;
+            var nodes = new Dictionary<long, NodeObject>();
+            var ways = new Dictionary<long, WayObject>();
+            var relations = new Dictionary<long, RelationObject>();
 
             using (var fileStream = FileClient.OpenRead(path))
             {
                 var source = new PBFOsmStreamSource(fileStream);
-                geos = source.Where(predicate).ToList();
+
+                foreach (var osmGeo in source.Where(predicate))
+                    switch (osmGeo)
+                    {
+                        case Node osmNode:
+                            nodes.Add(osmGeo.Id.GetValueOrDefault(), new NodeObject(osmNode));
+                            break;
+
+                        case Way osmWay:
+                            ways.Add(osmGeo.Id.GetValueOrDefault(), new WayObject(osmWay));
+                            break;
+
+                        case Relation osmRelation:
+                            relations.Add(osmGeo.Id.GetValueOrDefault(), new RelationObject(osmRelation));
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(osmGeo));
+                    }
             }
 
-            var nodes = geos.Where(i => i is Node).ToDictionary(i => i.Id.GetValueOrDefault(), i => (Node)i);
-            var ways = geos.Where(i => i is Way).ToDictionary(i => i.Id.GetValueOrDefault(), i => (Way)i);
-            var relations = geos.Where(i => i is Relation).ToDictionary(i => i.Id.GetValueOrDefault(), i => (Relation)i);
             LogService.LogInfo($"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
             LogService.LogInfo("Complete");
 
@@ -123,12 +140,12 @@ namespace OsmDataKit
                 ? new HashSet<long>(request.RelationIds.Distinct())
                 : new HashSet<long>();
 
-            var nodes = new Dictionary<long, Node>();
-            var ways = new Dictionary<long, Way>();
-            var relations = new Dictionary<long, Relation>();
-            var missedNodeIds = new List<long>();
-            var missedWayIds = new List<long>();
-            var missedRelationIds = new List<long>();
+            var nodes = new Dictionary<long, NodeObject>();
+            var ways = new Dictionary<long, WayObject>();
+            var relations = new Dictionary<long, RelationObject>();
+            List<long> missedNodeIds = null;
+            List<long> missedWayIds = null;
+            List<long> missedRelationIds = null;
             string logMessage;
 
             using (var fileStream = FileClient.OpenRead(path))
@@ -148,7 +165,7 @@ namespace OsmDataKit
 
                                 if (nodeIds.Contains(id))
                                 {
-                                    nodes.Add(id, osmGeo as Node);
+                                    nodes.Add(id, new NodeObject(osmGeo as Node));
 
                                     if (nodes.Count < nodeIds.Count)
                                         continue;
@@ -194,7 +211,7 @@ namespace OsmDataKit
 
                                 if (wayIds.Contains(id))
                                 {
-                                    ways.Add(id, osmGeo as Way);
+                                    ways.Add(id, new WayObject(osmGeo as Way));
 
                                     if (ways.Count < wayIds.Count)
                                         continue;
@@ -230,7 +247,7 @@ namespace OsmDataKit
 
                             if (relationIds.Contains(id))
                             {
-                                relations.Add(id, osmGeo as Relation);
+                                relations.Add(id, new RelationObject(osmGeo as Relation));
 
                                 if (relations.Count == relationIds.Count)
                                     goto Complete;
@@ -262,9 +279,9 @@ namespace OsmDataKit
                 Nodes = nodes,
                 Ways = ways,
                 Relations = relations,
-                MissedNodeIds = missedNodeIds,
-                MissedWayIds = missedWayIds,
-                MissedRelationIds = missedRelationIds
+                MissedNodeIds = missedNodeIds ?? new List<long>(0),
+                MissedWayIds = missedWayIds ?? new List<long>(0),
+                MissedRelationIds = missedRelationIds ?? new List<long>(0)
             };
         }
     }

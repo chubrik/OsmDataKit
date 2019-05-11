@@ -5,10 +5,10 @@ namespace OsmDataKit
 {
     public class GeoCoords : IGeoCoords
     {
-        public double Latitude { get; }
-        public double Longitude { get; }
+        public float Latitude { get; }
+        public float Longitude { get; }
 
-        public GeoCoords(double latitude, double longitude)
+        public GeoCoords(float latitude, float longitude)
         {
             Debug.Assert(latitude >= -90 && latitude <= 90);
             Debug.Assert(longitude >= -180 && longitude <= 180);

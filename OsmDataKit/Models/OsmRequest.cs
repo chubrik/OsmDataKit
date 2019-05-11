@@ -2,7 +2,7 @@
 
 namespace OsmDataKit
 {
-    public class OsmRequest
+    public sealed class OsmRequest
     {
         public IEnumerable<long> NodeIds { get; set; }
         public IEnumerable<long> WayIds { get; set; }

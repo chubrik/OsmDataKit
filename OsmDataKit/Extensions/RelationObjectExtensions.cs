@@ -4,25 +4,18 @@ using System.Linq;
 
 namespace OsmDataKit
 {
-    public static class RelationObjectExtensions
+    internal static class RelationObjectExtensions
     {
-        public static IEnumerable<NodeObject> GetNodes(this RelationObject relation) =>
-            relation.Members.GetNodes();
+        public static IEnumerable<NodeObject> GetAllNodes(this RelationObject relation) =>
+            relation.Members.Nodes().Concat(relation.Members.Ways().SelectMany(i => i.Nodes))
+                                    .Concat(relation.Members.Relations().SelectMany(GetAllNodes));
 
-        public static IEnumerable<WayObject> GetWays(this RelationObject relation) =>
-            relation.Members.GetWays();
-
-        public static IEnumerable<RelationObject> GetRelations(this RelationObject relation) =>
-            relation.Members.GetRelations();
-
-        public static IEnumerable<NodeObject> GetAllNestedNodes(this RelationObject relation) =>
-            relation.GetNodes().Concat(relation.GetWays().SelectMany(i => i.Nodes))
-                               .Concat(relation.GetRelations().SelectMany(i => i.GetAllNestedNodes()));
-
-        internal static bool GetIsBroken(this RelationObject relation)
+        public static bool HasMissedParts(this RelationObject relation)
         {
+            if (relation.MissedMembersInfo?.Count > 0)
+                return true;
+
             foreach (var member in relation.Members)
-            {
                 switch (member.Geo)
                 {
                     case NodeObject node:
@@ -30,14 +23,14 @@ namespace OsmDataKit
 
                     case WayObject way:
 
-                        if (way.IsBroken)
+                        if (way.HasMissedNodes)
                             return true;
 
                         break;
 
                     case RelationObject rel:
 
-                        if (rel.GetIsBroken())
+                        if (rel.HasMissedParts())
                             return true;
 
                         break;
@@ -45,7 +38,6 @@ namespace OsmDataKit
                     default:
                         throw new ArgumentOutOfRangeException(nameof(member));
                 }
-            }
 
             return false;
         }
