@@ -1,4 +1,5 @@
-﻿using OsmSharp;
+﻿using Newtonsoft.Json;
+using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,50 +7,40 @@ using System.Linq;
 
 namespace OsmDataKit
 {
+    [JsonObject]
     public class RelationObject : GeoObject
     {
         public override OsmGeoType Type => OsmGeoType.Relation;
 
-        public IReadOnlyList<RelationMemberObject> Members { get; private set; }
+        [JsonIgnore]
+        public IReadOnlyList<RelationMemberObject> Members { get; set; }
 
-        public IReadOnlyList<RelationMember> MissedMembersInfo { get; private set; }
+        [JsonProperty("m")]
+        public IReadOnlyList<RelationMemberInfo> MissedMembers { get; set; }
+
+        public RelationObject() { }
 
         internal RelationObject(Relation relation) : base(relation)
         {
-            MissedMembersInfo = relation.Members;
+            MissedMembers = relation.Members.Select(i =>
+                new RelationMemberInfo { Role = i.Role, Type = i.Type, Id = i.Id })
+                .ToList();
         }
-
-        ////todo internat ctor
-        //internal RelationObject(
-        //    long id,
-        //    IReadOnlyDictionary<string, string> tags)
-        //    : base(id, tags, data: null) { }
-
-        //public RelationObject(
-        //    long id,
-        //    IReadOnlyList<RelationMemberObject> members,
-        //    IReadOnlyDictionary<string, string> tags = null,
-        //    Dictionary<string, string> data = null)
-        //    : base(id, tags, data)
-        //{
-        //    SetMembers(members);
-        //}
-
-        //private bool? _isBroken;
-        //public bool IsBroken => _isBroken ?? (_isBroken = this.GetIsBroken()).Value;
 
         internal void SetMembers(IReadOnlyList<RelationMemberObject> members)
         {
+            Debug.Assert(Members == null);
             Debug.Assert(members?.Count > 0);
+
             Members = members ?? throw new ArgumentNullException(nameof(members));
 
-            var missedDict = MissedMembersInfo.ToDictionary(i => i.Id);
+            var missedDict = MissedMembers.ToDictionary(i => i.Id);
 
             foreach (var member in members)
                 if (!missedDict.Remove(member.Id))
                     throw new InvalidOperationException();
 
-            MissedMembersInfo = missedDict.Count > 0 ? missedDict.Values.ToList() : null;
+            MissedMembers = missedDict.Count > 0 ? missedDict.Values.ToList() : null;
         }
     }
 }

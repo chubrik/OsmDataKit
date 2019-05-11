@@ -12,7 +12,7 @@ namespace OsmDataKit
 
         public static bool HasMissedParts(this RelationObject relation)
         {
-            if (relation.MissedMembersInfo?.Count > 0)
+            if (relation.MissedMembers?.Count > 0)
                 return true;
 
             foreach (var member in relation.Members)

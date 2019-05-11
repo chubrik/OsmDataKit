@@ -33,7 +33,7 @@ namespace OsmDataKit.Tests
             var relation = OsmObjectService.LoadRelationObject(SrcPath, cacheName: title, relationId: relationId);
             Assert.IsTrue(relation.Type == OsmGeoType.Relation);
             Assert.IsTrue(relation.Id == relationId);
-            Assert.IsTrue(relation.Title == title);
+            //Assert.IsTrue(relation.Title == title);
             Assert.IsTrue(relation.Tags["type"] == "multipolygon");
             Assert.IsTrue(relation.Tags["place"] == "island");
             Assert.IsTrue(relation.Members.Count > 50);

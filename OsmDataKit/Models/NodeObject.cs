@@ -1,13 +1,21 @@
-﻿using OsmSharp;
+﻿using Newtonsoft.Json;
+using OsmSharp;
+using System.Diagnostics;
 
 namespace OsmDataKit
 {
+    [JsonObject]
     public class NodeObject : GeoObject, IGeoCoords
     {
         public override OsmGeoType Type => OsmGeoType.Node;
 
-        public float Latitude { get; }
-        public float Longitude { get; }
+        [JsonIgnore]
+        public float Latitude { get; set; }
+
+        [JsonIgnore]
+        public float Longitude { get; set; }
+
+        public NodeObject() { }
 
         internal NodeObject(Node node) : base(node)
         {
@@ -15,17 +23,16 @@ namespace OsmDataKit
             Longitude = (float)node.Longitude.GetValueOrDefault();
         }
 
-        //public NodeObject(
-        //    long id, double latitude, double longitude,
-        //    IReadOnlyDictionary<string, string> tags = null,
-        //    Dictionary<string, string> data = null)
-        //    : base(id, tags, data)
-        //{
-        //    Debug.Assert(latitude >= -90 && latitude <= 90);
-        //    Debug.Assert(longitude >= -180 && longitude <= 180);
-
-        //    Latitude = latitude;
-        //    Longitude = longitude;
-        //}
+        [JsonProperty("c")]
+        public float[] _coords
+        {
+            get => new[] { Latitude, Longitude };
+            set
+            {
+                Debug.Assert(value?.Length == 2);
+                Latitude = value[0];
+                Longitude = value[1];
+            }
+        }
     }
 }

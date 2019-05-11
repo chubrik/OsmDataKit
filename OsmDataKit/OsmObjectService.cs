@@ -1,5 +1,4 @@
 ﻿using Kit;
-using OsmDataKit.Data;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
@@ -22,11 +21,14 @@ namespace OsmDataKit
                 throw new ArgumentException(nameof(cacheName));
 
             var cachePath = FullCachePath(cacheName);
+            OsmResponse response;
+            OsmObjectResponse objects;
 
             if (FileClient.Exists(cachePath))
             {
-                var data = JsonFileClient.Read<OsmResponseData>(cachePath);
-                return BuildObjects(data).AllRelationsDict[relationId];
+                response = JsonFileClient.Read<OsmResponse>(cachePath);
+                objects = BuildObjects(response);
+                goto Result;
             }
 
             if (!FileClient.Exists(path))
@@ -34,23 +36,28 @@ namespace OsmDataKit
 
             LogService.LogInfo("Load OSM response data");
             var cacheStepPath = StepCachePath(cacheName, 1);
-            OsmResponse response;
 
             if (FileClient.Exists(cacheStepPath))
-            {
-                var data = JsonFileClient.Read<OsmResponseData>(cacheStepPath);
-                response = DataConverter.ToOsm(data);
-            }
+                response = JsonFileClient.Read<OsmResponse>(cacheStepPath);
             else
             {
                 LogService.LogInfo($"Step 1");
                 var request = new OsmRequest { RelationIds = new List<long> { relationId } };
                 response = OsmService.Load(path, request);
-                var data = DataConverter.ToData(response);
-                JsonFileClient.Write(cacheStepPath, data);
+                JsonFileClient.Write(cacheStepPath, response);
             }
 
-            return LoadSteps(path, cacheName, response, stepLimit).AllRelationsDict[relationId];
+            objects = LoadSteps(path, cacheName, response, stepLimit);
+
+            Result:
+
+            if (objects.Relations.TryGetValue(relationId, out var relation))
+                return relation;
+
+            if (objects.BrokenRelations.TryGetValue(relationId, out var brokenRelation))
+                return brokenRelation;
+
+            return null;
         }
 
         public static OsmObjectResponse LoadObjects(string path, string cacheName, Func<OsmGeo, bool> predicate, int stepLimit = 0)
@@ -69,11 +76,12 @@ namespace OsmDataKit
                 throw new ArgumentNullException(nameof(predicate));
 
             var cachePath = FullCachePath(cacheName);
+            OsmResponse response;
 
             if (FileClient.Exists(cachePath))
             {
-                var data = JsonFileClient.Read<OsmResponseData>(cachePath);
-                return BuildObjects(data);
+                response = JsonFileClient.Read<OsmResponse>(cachePath);
+                return BuildObjects(response);
             }
 
             if (!FileClient.Exists(path))
@@ -81,19 +89,14 @@ namespace OsmDataKit
 
             LogService.LogInfo("Load OSM response data");
             var cacheStepPath = StepCachePath(cacheName, 1);
-            OsmResponse response;
 
             if (FileClient.Exists(cacheStepPath))
-            {
-                var data = JsonFileClient.Read<OsmResponseData>(cacheStepPath);
-                response = DataConverter.ToOsm(data);
-            }
+                response = JsonFileClient.Read<OsmResponse>(cacheStepPath);
             else
             {
                 LogService.LogInfo($"Step 1");
                 response = OsmService.Load(path, predicate);
-                var data = DataConverter.ToData(response);
-                JsonFileClient.Write(cacheStepPath, data);
+                JsonFileClient.Write(cacheStepPath, response);
             }
 
             return LoadSteps(path, cacheName, response, stepLimit);
@@ -119,52 +122,54 @@ namespace OsmDataKit
                     $"{response.MissedWayIds.Count} ways, " +
                     $"{response.MissedRelationIds.Count} relations");
 
-            var data = DataConverter.ToData(response);
-            JsonFileClient.Write(FullCachePath(cacheName), data);
-            var objects = BuildObjects(data);
+            JsonFileClient.Write(FullCachePath(cacheName), response);
+            var objects = BuildObjects(response);
             LogService.LogInfo("Load OSM response data complete");
             return objects;
         }
 
         private static bool FillNested(string path, string cacheName, OsmResponse response, int step)
         {
-            OsmResponse newResponse;
             var cacheStepPath = StepCachePath(cacheName, step);
+            OsmResponse newResponse;
 
             if (FileClient.Exists(cacheStepPath))
-            {
-                var data = JsonFileClient.Read<OsmResponseData>(cacheStepPath);
-                newResponse = DataConverter.ToOsm(data);
-            }
+                newResponse = JsonFileClient.Read<OsmResponse>(cacheStepPath);
             else
             {
+                var nodes = response.Nodes;
+                var ways = response.Ways;
+                var relations = response.Relations;
+                var missedNodeIds = new HashSet<long>(response.MissedNodeIds);
+                var missedWayIds = new HashSet<long>(response.MissedWayIds);
+                var missedRelationIds = new HashSet<long>(response.MissedRelationIds);
+
                 var wayNodeIds = response.Ways.Values.SelectMany(i => i.MissedNodeIds);
-                var relMembers = response.Relations.Values.SelectMany(i => i.Members).ToList();
+                var relMembers = response.Relations.Values.SelectMany(i => i.MissedMembers).ToList();
                 var relNodeIds = relMembers.Where(i => i.Type == OsmGeoType.Node).Select(i => i.Id);
                 var relWayIds = relMembers.Where(i => i.Type == OsmGeoType.Way).Select(i => i.Id);
                 var relRelIds = relMembers.Where(i => i.Type == OsmGeoType.Relation).Select(i => i.Id);
 
-                var nestedNodeIds = wayNodeIds.Concat(relNodeIds).Distinct()
-                                              .Where(i => !response.Nodes.ContainsKey(i) &&
-                                                          !response.MissedNodeIds.Contains(i)).ToList();
+                var needNodeIds = wayNodeIds.Concat(relNodeIds).Distinct()
+                                            .Where(i => !nodes.ContainsKey(i) &&
+                                                        !missedNodeIds.Contains(i)).ToList();
 
-                var nestedWayIds = relWayIds.Distinct()
-                                            .Where(i => !response.Ways.ContainsKey(i) &&
-                                                        !response.MissedWayIds.Contains(i)).ToList();
+                var needWayIds = relWayIds.Distinct()
+                                          .Where(i => !ways.ContainsKey(i) &&
+                                                      !missedWayIds.Contains(i)).ToList();
 
-                var nestedRelIds = relRelIds.Distinct()
-                                            .Where(i => !response.Relations.ContainsKey(i) &&
-                                                        !response.MissedRelationIds.Contains(i)).ToList();
+                var needRelIds = relRelIds.Distinct()
+                                          .Where(i => !relations.ContainsKey(i) &&
+                                                      !missedRelationIds.Contains(i)).ToList();
 
-                if (nestedNodeIds.Count == 0 && nestedWayIds.Count == 0 && nestedRelIds.Count == 0)
+                if (needNodeIds.Count == 0 && needWayIds.Count == 0 && needRelIds.Count == 0)
                     return false;
 
-                var request = new OsmRequest { NodeIds = nestedNodeIds, WayIds = nestedWayIds, RelationIds = nestedRelIds };
+                var newRequest = new OsmRequest { NodeIds = needNodeIds, WayIds = needWayIds, RelationIds = needRelIds };
 
                 LogService.LogInfo($"Step {step}");
-                newResponse = OsmService.Load(path, request);
-                var newData = DataConverter.ToData(newResponse);
-                JsonFileClient.Write(cacheStepPath, newData);
+                newResponse = OsmService.Load(path, newRequest);
+                JsonFileClient.Write(cacheStepPath, newResponse);
             }
 
             response.Nodes.AddRange(newResponse.Nodes);
@@ -193,7 +198,7 @@ namespace OsmDataKit
             {
                 var members = new List<RelationMemberObject>();
 
-                foreach (var memberInfo in relation.MissedMembersInfo)
+                foreach (var memberInfo in relation.MissedMembers)
                     switch (memberInfo.Type)
                     {
                         case OsmGeoType.Node:
@@ -226,25 +231,42 @@ namespace OsmDataKit
 
             var wayNodeIds = allWays.Values.SelectMany(i => i.Nodes).Select(i => i.Id);
             var relNodeIds = allRelations.Values.SelectMany(i => i.Members.Nodes()).Select(i => i.Id);
-            var memberNodeIds = new HashSet<long>(wayNodeIds.Concat(relNodeIds));
-            var memberWayIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Ways()).Select(i => i.Id));
-            var memberRelationIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Relations()).Select(i => i.Id));
-            var rootNodes = allNodes.Values.Where(i => !memberNodeIds.Contains(i.Id)).ToList();
-            var rootWays = allWays.Values.Where(i => !memberWayIds.Contains(i.Id)).ToList();
-            var rootRelations = allRelations.Values.Where(i => !memberRelationIds.Contains(i.Id)).ToList();
+            var childNodeIds = new HashSet<long>(wayNodeIds.Concat(relNodeIds));
+            var childWayIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Ways()).Select(i => i.Id));
+            var childRelationIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Relations()).Select(i => i.Id));
 
-            var validRootWays = rootWays.Where(i => !i.HasMissedNodes).ToList();
-            var validRootRelations = rootRelations.Where(i => !i.HasMissedParts()).ToList();
-            var brokenRootWays = rootWays.Where(i => i.HasMissedNodes).ToList();
-            var brokenRootRelations = rootRelations.Where(i => i.HasMissedParts()).ToList();
+            var rootNodes = allNodes.Values.Where(i => !childNodeIds.Contains(i.Id)).ToDictionary(i => i.Id);
+            var rootWays = allWays.Values.Where(i => !childWayIds.Contains(i.Id));
+            var rootRelations = allRelations.Values.Where(i => !childRelationIds.Contains(i.Id));
+
+            var completedWays = new Dictionary<long, WayObject>();
+            var brokenWays = new Dictionary<long, WayObject>();
+
+            foreach (var rootWay in rootWays)
+                if (!rootWay.HasMissedNodes)
+                    completedWays.Add(rootWay.Id, rootWay);
+                else
+                    brokenWays.Add(rootWay.Id, rootWay);
+
+            var completedRelations = new Dictionary<long, RelationObject>();
+            var brokenRelations = new Dictionary<long, RelationObject>();
+
+            foreach (var rootRelation in rootRelations)
+                if (!rootRelation.HasMissedParts())
+                    completedRelations.Add(rootRelation.Id, rootRelation);
+                else
+                    brokenRelations.Add(rootRelation.Id, rootRelation);
 
             return new OsmObjectResponse
             {
                 Nodes = rootNodes,
-                Ways = validRootWays,
-                Relations = validRootRelations,
-                BrokenWays = brokenRootWays,
-                BrokenRelations = brokenRootRelations
+                Ways = completedWays,
+                Relations = completedRelations,
+                BrokenWays = brokenWays,
+                BrokenRelations = brokenRelations,
+                MissedNodeIds = response.MissedNodeIds,
+                MissedWayIds = response.MissedWayIds,
+                MissedRelationIds = response.MissedRelationIds
             };
         }
 

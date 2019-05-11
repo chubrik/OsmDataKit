@@ -1,4 +1,5 @@
-﻿using OsmSharp;
+﻿using Newtonsoft.Json;
+using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,13 +7,18 @@ using System.Linq;
 
 namespace OsmDataKit
 {
+    [JsonObject]
     public class WayObject : GeoObject
     {
         public override OsmGeoType Type => OsmGeoType.Way;
 
-        public IReadOnlyList<NodeObject> Nodes { get; private set; }
+        [JsonIgnore]
+        public IReadOnlyList<NodeObject> Nodes { get; set; }
 
-        public IReadOnlyList<long> MissedNodeIds { get; private set; }
+        [JsonProperty("n")]
+        public IReadOnlyList<long> MissedNodeIds { get; set; }
+
+        public WayObject() { }
 
         internal WayObject(Way way) : base(way)
         {
@@ -21,30 +27,11 @@ namespace OsmDataKit
 
         internal bool HasMissedNodes => MissedNodeIds?.Count > 0;
 
-        //public WayObject(
-        //    long id,
-        //    IReadOnlyList<NodeObject> nodes,
-        //    IReadOnlyDictionary<string, string> tags = null,
-        //    Dictionary<string, string> data = null)
-        //    : base(id, tags, data)
-        //{
-        //    Debug.Assert(nodes?.Count > 0);
-
-        //    if (nodes == null)
-        //        throw new ArgumentNullException(nameof(nodes));
-
-        //    if (nodes.Count == 0)
-        //        throw new ArgumentException(nameof(nodes));
-
-        //    NodeIds = nodes.Select(i => i.Id).ToList();
-        //    Nodes = nodes;
-        //}
-
-        //public bool IsBroken => NodeIds.Count != Nodes.Count;
-
         internal void SetNodes(IReadOnlyList<NodeObject> nodes)
         {
+            Debug.Assert(Nodes == null);
             Debug.Assert(nodes?.Count > 0);
+
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
 
             var missedSet = new HashSet<long>(MissedNodeIds);

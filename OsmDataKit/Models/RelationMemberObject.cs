@@ -4,9 +4,6 @@ using System.Diagnostics;
 
 namespace OsmDataKit
 {
-    //#if DEBUG
-    //    [DebuggerDisplay("{" + nameof(DebugInfo) + ",nq}")]
-    //#endif
     public class RelationMemberObject
     {
         public string Role { get; }
@@ -26,9 +23,6 @@ namespace OsmDataKit
             Geo = geo ?? throw new ArgumentNullException(nameof(geo));
         }
 
-        //#if DEBUG
-        //        private string DebugInfo =>
-        //            Geo.Type.ToString()[0] + Geo.Id.ToString() + " - " + Role + " - " + Geo.Title;
-        //#endif
+        public override string ToString() => Role +  " - " + Geo.ToString();
     }
 }
