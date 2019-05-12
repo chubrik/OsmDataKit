@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OsmSharp;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace OsmDataKit
@@ -16,6 +18,23 @@ namespace OsmDataKit
         public float Longitude { get; set; }
 
         public NodeObject() { }
+
+        public NodeObject(
+            long id, float latitude, float longitude, Dictionary<string, string> tags = null)
+            : base(id, tags)
+        {
+            Debug.Assert(latitude >= -90 && latitude <= 90);
+            Debug.Assert(longitude >= -180 && longitude <= 180);
+
+            if (latitude < -90 || latitude > 90)
+                throw new ArgumentOutOfRangeException(nameof(latitude));
+
+            if (longitude < -180 || longitude > 180)
+                throw new ArgumentOutOfRangeException(nameof(longitude));
+
+            Latitude = latitude;
+            Longitude = longitude;
+        }
 
         internal NodeObject(Node node) : base(node)
         {

@@ -191,7 +191,7 @@ namespace OsmDataKit
             foreach (var way in allWays.Values)
             {
                 var nodes = way.MissedNodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList();
-                way.SetNodes(nodes);
+                way.FillNodes(nodes);
             }
 
             foreach (var relation in allRelations.Values)
@@ -226,7 +226,7 @@ namespace OsmDataKit
                             throw new ArgumentOutOfRangeException(nameof(memberInfo.Type));
                     }
 
-                allRelations[relation.Id].SetMembers(members);
+                allRelations[relation.Id].FillMembers(members);
             }
 
             var wayNodeIds = allWays.Values.SelectMany(i => i.Nodes).Select(i => i.Id);

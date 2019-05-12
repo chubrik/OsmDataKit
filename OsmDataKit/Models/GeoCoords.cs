@@ -8,6 +8,9 @@ namespace OsmDataKit
         public float Latitude { get; }
         public float Longitude { get; }
 
+        public GeoCoords(double latitude, double longitude) 
+            : this((float)latitude, (float)longitude) { }
+
         public GeoCoords(float latitude, float longitude)
         {
             Debug.Assert(latitude >= -90 && latitude <= 90);

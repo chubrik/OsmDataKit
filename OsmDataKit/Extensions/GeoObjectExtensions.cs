@@ -4,7 +4,7 @@ namespace OsmDataKit
 {
     public static class GeoObjectExtensions
     {
-        public static IGeoCoords GetCenterCoords(this GeoObject geo)
+        public static IGeoCoords CenterCoords(this GeoObject geo)
         {
             switch (geo)
             {
@@ -15,7 +15,7 @@ namespace OsmDataKit
                     return way.Nodes.AverageCoords();
 
                 case RelationObject relation:
-                    return relation.GetAllNodes().AverageCoords();
+                    return relation.AllNodes().AverageCoords();
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(geo));

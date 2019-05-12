@@ -14,15 +14,15 @@ namespace OsmDataKit
 
         public long Id => Geo.Id;
 
-        internal RelationMemberObject(string role, GeoObject geo)
+        public RelationMemberObject(string role, GeoObject geo)
         {
             Debug.Assert(role != null);
             Debug.Assert(geo != null);
 
-            Role = role;
+            Role = role ?? throw new ArgumentNullException(nameof(role));
             Geo = geo ?? throw new ArgumentNullException(nameof(geo));
         }
 
-        public override string ToString() => Role +  " - " + Geo.ToString();
+        public override string ToString() => Role + " - " + Geo.ToString();
     }
 }

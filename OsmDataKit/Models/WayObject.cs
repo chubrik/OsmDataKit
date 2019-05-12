@@ -20,16 +20,43 @@ namespace OsmDataKit
 
         public WayObject() { }
 
+        public WayObject(
+            long id, IReadOnlyList<NodeObject> nodes, Dictionary<string, string> tags = null)
+            : base(id, tags)
+        {
+            Debug.Assert(nodes != null);
+            Debug.Assert(nodes?.Count > 0);
+
+            if (nodes == null)
+                throw new ArgumentNullException(nameof(nodes));
+
+            if (nodes.Count == 0)
+                throw new ArgumentException(nameof(nodes));
+
+            Nodes = nodes;
+        }
+
         internal WayObject(Way way) : base(way)
         {
             MissedNodeIds = way.Nodes;
         }
 
-        internal bool HasMissedNodes => MissedNodeIds?.Count > 0;
+        [JsonIgnore]
+        public bool HasMissedNodes => MissedNodeIds?.Count > 0;
 
-        internal void SetNodes(IReadOnlyList<NodeObject> nodes)
+        internal void ReplaceNodes(IReadOnlyList<NodeObject> nodes)
         {
             Debug.Assert(Nodes == null);
+            Debug.Assert(nodes?.Count > 0);
+
+            Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
+            MissedNodeIds = null;
+        }
+
+        internal void FillNodes(IReadOnlyList<NodeObject> nodes)
+        {
+            Debug.Assert(Nodes == null);
+            Debug.Assert(nodes != null);
             Debug.Assert(nodes?.Count > 0);
 
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
@@ -37,8 +64,7 @@ namespace OsmDataKit
             var missedSet = new HashSet<long>(MissedNodeIds);
 
             foreach (var node in nodes)
-                if (!missedSet.Remove(node.Id))
-                    throw new InvalidOperationException();
+                missedSet.Remove(node.Id);
 
             MissedNodeIds = missedSet.Count > 0 ? missedSet.ToList() : null;
         }
