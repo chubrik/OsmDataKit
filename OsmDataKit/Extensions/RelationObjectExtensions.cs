@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace OsmDataKit
@@ -19,36 +18,8 @@ namespace OsmDataKit
             return relations.Concat(relations.SelectMany(AllRelations)).Distinct();
         }
 
-        public static bool HasMissedParts(this RelationObject relation)
-        {
-            if (relation.MissedMembers?.Count > 0)
-                return true;
-
-            foreach (var member in relation.Members)
-                switch (member.Geo)
-                {
-                    case NodeObject node:
-                        break;
-
-                    case WayObject way:
-
-                        if (way.HasMissedNodes)
-                            return true;
-
-                        break;
-
-                    case RelationObject rel:
-
-                        if (rel.HasMissedParts())
-                            return true;
-
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(member));
-                }
-
-            return false;
-        }
+        public static bool IsCompleted(this RelationObject relation) =>
+            (relation.MissedMembers == null || relation.MissedMembers.Count == 0) &&
+            relation.Members.All(i => i.Geo.IsCompleted());
     }
 }

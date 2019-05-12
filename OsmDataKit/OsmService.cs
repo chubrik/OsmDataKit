@@ -10,21 +10,21 @@ namespace OsmDataKit
 {
     public static class OsmService
     {
-        public static void ValidateSource(string path)
+        public static void ValidateSource(string pbfPath)
         {
-            Debug.Assert(path != null);
+            Debug.Assert(pbfPath != null);
 
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
+            if (pbfPath == null)
+                throw new ArgumentNullException(nameof(pbfPath));
 
-            LogService.LogInfo($"OSM validation: {path}");
+            LogService.LogInfo($"OSM validation: {pbfPath}");
             var previousType = OsmGeoType.Node;
             long? previousId = 0;
             long count = 0;
             long totalCount = 0;
             long noIdCount = 0;
 
-            using (var fileStream = FileClient.OpenRead(path))
+            using (var fileStream = FileClient.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
@@ -64,13 +64,13 @@ namespace OsmDataKit
             LogService.LogInfo($"OSM validation completed");
         }
 
-        public static OsmResponse Load(string path, Func<OsmGeo, bool> predicate)
+        public static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> predicate)
         {
-            Debug.Assert(path != null);
+            Debug.Assert(pbfPath != null);
             Debug.Assert(predicate != null);
 
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
+            if (pbfPath == null)
+                throw new ArgumentNullException(nameof(pbfPath));
 
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -79,7 +79,7 @@ namespace OsmDataKit
             var ways = new Dictionary<long, WayObject>();
             var relations = new Dictionary<long, RelationObject>();
 
-            using (var fileStream = FileClient.OpenRead(path))
+            using (var fileStream = FileClient.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
@@ -108,13 +108,13 @@ namespace OsmDataKit
             return new OsmResponse { Nodes = nodes, Ways = ways, Relations = relations };
         }
 
-        public static OsmResponse Load(string path, OsmRequest request)
+        public static OsmResponse Load(string pbfPath, OsmRequest request)
         {
-            Debug.Assert(path != null);
+            Debug.Assert(pbfPath != null);
             Debug.Assert(request != null);
 
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
+            if (pbfPath == null)
+                throw new ArgumentNullException(nameof(pbfPath));
 
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
@@ -139,7 +139,7 @@ namespace OsmDataKit
             List<long> missedRelationIds = null;
             string logMessage;
 
-            using (var fileStream = FileClient.OpenRead(path))
+            using (var fileStream = FileClient.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
                 var thisType = requestNodeIds.Count > 0 ? OsmGeoType.Node : requestWayIds.Count > 0 ? OsmGeoType.Way : OsmGeoType.Relation;

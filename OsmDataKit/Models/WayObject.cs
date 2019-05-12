@@ -42,7 +42,7 @@ namespace OsmDataKit
         }
 
         [JsonIgnore]
-        public bool HasMissedNodes => MissedNodeIds?.Count > 0;
+        public bool IsCompleted => MissedNodeIds == null || MissedNodeIds.Count == 0;
 
         internal void ReplaceNodes(IReadOnlyList<NodeObject> nodes)
         {

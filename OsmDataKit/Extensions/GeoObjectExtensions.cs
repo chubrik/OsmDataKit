@@ -21,5 +21,23 @@ namespace OsmDataKit
                     throw new ArgumentOutOfRangeException(nameof(geo));
             }
         }
+
+        public static bool IsCompleted(this GeoObject geo)
+        {
+            switch (geo)
+            {
+                case NodeObject node:
+                    return true;
+
+                case WayObject way:
+                    return way.IsCompleted;
+
+                case RelationObject rel:
+                    return rel.IsCompleted();
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(geo));
+            }
+        }
     }
 }

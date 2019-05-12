@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OsmSharp;
+using System.Linq;
 
 namespace OsmDataKit.Tests
 {
@@ -28,15 +29,26 @@ namespace OsmDataKit.Tests
 
             // https://www.openstreetmap.org/relation/2969204
             var title = "Vega Island";
-            var relationId = 2969204;
+            long relationId = 2969204;
 
-            var relation = OsmObjectService.LoadRelationObject(SrcPath, cacheName: title, relationId: relationId);
+            var request = new OsmRequest { RelationIds = new[] { relationId } };
+            var response = OsmObjectService.LoadObjects(SrcPath, cacheName: title, request);
+
+            Assert.IsTrue(response.RootNodes.Count == 0);
+            Assert.IsTrue(response.RootWays.Count == 0);
+            Assert.IsTrue(response.RootRelations.Count == 1);
+            Assert.IsTrue(response.MissedNodeIds.Count == 0);
+            Assert.IsTrue(response.MissedWayIds.Count == 0);
+            Assert.IsTrue(response.MissedRelationIds.Count == 0);
+
+            var relation = response.RootRelations.Values.Single();
+
             Assert.IsTrue(relation.Type == OsmGeoType.Relation);
             Assert.IsTrue(relation.Id == relationId);
-            //Assert.IsTrue(relation.Title == title);
             Assert.IsTrue(relation.Tags["type"] == "multipolygon");
             Assert.IsTrue(relation.Tags["place"] == "island");
-            Assert.IsTrue(relation.Members.Count > 50);
+            Assert.IsTrue(relation.Members.Count > 100);
+            Assert.IsTrue(relation.IsCompleted());
         }
     }
 }

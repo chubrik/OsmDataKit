@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace OsmDataKit
 {
-    public static class GeoCoordsCollectionExtensions
+    public static class GeoCoordsExtensions
     {
         public static GeoCoords AverageCoords(this IEnumerable<IGeoCoords> coordsColletion)
         {
