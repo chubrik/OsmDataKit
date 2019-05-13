@@ -32,7 +32,7 @@ namespace OsmDataKit.Tests
             long relationId = 2969204;
 
             var request = new OsmRequest { RelationIds = new[] { relationId } };
-            var response = OsmObjectService.LoadObjects(SrcPath, cacheName: title, request);
+            var response = OsmService.LoadObjects(SrcPath, cacheName: title, request);
 
             Assert.IsTrue(response.RootNodes.Count == 0);
             Assert.IsTrue(response.RootWays.Count == 0);

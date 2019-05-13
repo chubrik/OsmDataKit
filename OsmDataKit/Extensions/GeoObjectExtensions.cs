@@ -26,7 +26,7 @@ namespace OsmDataKit
         {
             switch (geo)
             {
-                case NodeObject node:
+                case NodeObject _:
                     return true;
 
                 case WayObject way:

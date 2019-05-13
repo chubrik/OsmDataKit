@@ -17,9 +17,7 @@ namespace OsmDataKit
         public Dictionary<long, RelationObject> Relations { get; set; } = new Dictionary<long, RelationObject>(0);
 
         public List<long> MissedNodeIds { get; set; } = new List<long>(0);
-
         public List<long> MissedWayIds { get; set; } = new List<long>(0);
-
         public List<long> MissedRelationIds { get; set; } = new List<long>(0);
 
         [JsonProperty("Nodes")]
