@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OsmSharp;
+using System;
 
 namespace OsmDataKit
 {
@@ -18,7 +19,7 @@ namespace OsmDataKit
                     return relation.AllNodes().AverageCoords();
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(geo));
+                    throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
             }
         }
 
@@ -36,7 +37,7 @@ namespace OsmDataKit
                     return rel.IsCompleted();
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(geo));
+                    throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
             }
         }
     }

@@ -91,22 +91,22 @@ namespace OsmDataKit
                 var source = new PBFOsmStreamSource(fileStream);
 
                 foreach (var osmGeo in source.Where(predicate))
-                    switch (osmGeo)
+                    switch (osmGeo.Type)
                     {
-                        case Node osmNode:
-                            nodes.Add(osmGeo.Id.GetValueOrDefault(), new NodeObject(osmNode));
+                        case OsmGeoType.Node:
+                            nodes.Add(osmGeo.Id.GetValueOrDefault(), new NodeObject(osmGeo as Node));
                             break;
 
-                        case Way osmWay:
-                            ways.Add(osmGeo.Id.GetValueOrDefault(), new WayObject(osmWay));
+                        case OsmGeoType.Way:
+                            ways.Add(osmGeo.Id.GetValueOrDefault(), new WayObject(osmGeo as Way));
                             break;
 
-                        case Relation osmRelation:
-                            relations.Add(osmGeo.Id.GetValueOrDefault(), new RelationObject(osmRelation));
+                        case OsmGeoType.Relation:
+                            relations.Add(osmGeo.Id.GetValueOrDefault(), new RelationObject(osmGeo as Relation));
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(osmGeo));
+                            throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
                     }
             }
 
@@ -140,9 +140,9 @@ namespace OsmDataKit
                 ? new HashSet<long>(request.RelationIds.Distinct())
                 : new HashSet<long>();
 
-            var nodes = new Dictionary<long, NodeObject>();
-            var ways = new Dictionary<long, WayObject>();
-            var relations = new Dictionary<long, RelationObject>();
+            var foundNodes = new Dictionary<long, NodeObject>();
+            var foundWays = new Dictionary<long, WayObject>();
+            var foundRelations = new Dictionary<long, RelationObject>();
             List<long> missedNodeIds = null;
             List<long> missedWayIds = null;
             List<long> missedRelationIds = null;
@@ -159,23 +159,23 @@ namespace OsmDataKit
                     {
                         case OsmGeoType.Node:
 
-                            if (osmGeo is Node)
+                            if (osmGeo.Type == OsmGeoType.Node)
                             {
                                 id = osmGeo.Id.GetValueOrDefault();
 
                                 if (requestNodeIds.Contains(id))
                                 {
-                                    nodes.Add(id, new NodeObject(osmGeo as Node));
+                                    foundNodes.Add(id, new NodeObject(osmGeo as Node));
 
-                                    if (nodes.Count < requestNodeIds.Count)
+                                    if (foundNodes.Count < requestNodeIds.Count)
                                         continue;
                                 }
                                 else
                                     continue;
                             }
 
-                            missedNodeIds = requestNodeIds.Where(i => !nodes.ContainsKey(i)).OrderBy(i => i).ToList();
-                            logMessage = $"Loaded {nodes.Count} nodes";
+                            missedNodeIds = requestNodeIds.Where(i => !foundNodes.ContainsKey(i)).OrderBy(i => i).ToList();
+                            logMessage = $"Loaded {foundNodes.Count} nodes";
 
                             if (missedNodeIds.Count == 0)
                                 LogService.LogInfo(logMessage);
@@ -203,23 +203,23 @@ namespace OsmDataKit
                             if (osmGeo.Type < thisType)
                                 continue;
 
-                            if (osmGeo is Way)
+                            if (osmGeo.Type == OsmGeoType.Way)
                             {
                                 id = osmGeo.Id.GetValueOrDefault();
 
                                 if (requestWayIds.Contains(id))
                                 {
-                                    ways.Add(id, new WayObject(osmGeo as Way));
+                                    foundWays.Add(id, new WayObject(osmGeo as Way));
 
-                                    if (ways.Count < requestWayIds.Count)
+                                    if (foundWays.Count < requestWayIds.Count)
                                         continue;
                                 }
                                 else
                                     continue;
                             }
 
-                            missedWayIds = requestWayIds.Where(i => !ways.ContainsKey(i)).OrderBy(i => i).ToList();
-                            logMessage = $"Loaded {ways.Count} ways";
+                            missedWayIds = requestWayIds.Where(i => !foundWays.ContainsKey(i)).OrderBy(i => i).ToList();
+                            logMessage = $"Loaded {foundWays.Count} ways";
 
                             if (missedWayIds.Count == 0)
                                 LogService.LogInfo(logMessage);
@@ -243,23 +243,23 @@ namespace OsmDataKit
 
                             if (requestRelationIds.Contains(id))
                             {
-                                relations.Add(id, new RelationObject(osmGeo as Relation));
+                                foundRelations.Add(id, new RelationObject(osmGeo as Relation));
 
-                                if (relations.Count == requestRelationIds.Count)
+                                if (foundRelations.Count == requestRelationIds.Count)
                                     goto Complete;
                             }
 
                             continue;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(thisType));
+                            throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
                     }
             }
 
             Complete:
 
-            missedRelationIds = requestRelationIds.Where(i => !relations.ContainsKey(i)).OrderBy(i => i).ToList();
-            logMessage = $"Loaded {relations.Count} relations";
+            missedRelationIds = requestRelationIds.Where(i => !foundRelations.ContainsKey(i)).OrderBy(i => i).ToList();
+            logMessage = $"Loaded {foundRelations.Count} relations";
 
             if (missedRelationIds.Count == 0)
                 LogService.LogInfo(logMessage);
@@ -270,9 +270,9 @@ namespace OsmDataKit
 
             return new OsmResponse
             {
-                Nodes = nodes,
-                Ways = ways,
-                Relations = relations,
+                Nodes = foundNodes,
+                Ways = foundWays,
+                Relations = foundRelations,
                 MissedNodeIds = missedNodeIds ?? new List<long>(0),
                 MissedWayIds = missedWayIds ?? new List<long>(0),
                 MissedRelationIds = missedRelationIds ?? new List<long>(0)
@@ -373,7 +373,7 @@ namespace OsmDataKit
 
             JsonFileClient.Write(FullCachePath(cacheName), response);
             var objects = BuildObjects(response);
-            LogService.EndInfo("Load OSM objects complete");
+            LogService.EndInfo("Load OSM objects completed");
             return objects;
         }
 
@@ -479,7 +479,7 @@ namespace OsmDataKit
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(memberInfo.Type));
+                            throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
                     }
 
                 allRelations[relation.Id].FillMembers(members);
