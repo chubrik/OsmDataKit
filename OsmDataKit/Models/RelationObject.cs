@@ -60,7 +60,11 @@ namespace OsmDataKit
 
             Members = members ?? throw new ArgumentNullException(nameof(members));
 
-            var missedDict = MissedMembers.ToDictionary(i => (i.Role, i.Type, i.Id));
+            var missedDict = new Dictionary<(string, OsmGeoType, long), RelationMemberInfo>(members.Count);
+
+            foreach (var missedMember in MissedMembers)
+                if (!missedDict.ContainsKey((missedMember.Role, missedMember.Type, missedMember.Id)))
+                    missedDict.Add((missedMember.Role, missedMember.Type, missedMember.Id), missedMember);
 
             foreach (var member in members)
                 missedDict.Remove((member.Role, member.Type, member.Id));

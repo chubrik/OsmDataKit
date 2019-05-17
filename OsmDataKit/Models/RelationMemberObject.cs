@@ -23,6 +23,8 @@ namespace OsmDataKit
             Geo = geo ?? throw new ArgumentNullException(nameof(geo));
         }
 
+        public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
+
         public override string ToString() => Role + " - " + Geo.ToString();
     }
 }

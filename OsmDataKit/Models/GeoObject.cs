@@ -44,7 +44,7 @@ namespace OsmDataKit
         }
 
         [JsonIgnore]
-        public string OsmUrl => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
+        public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
 
         private static readonly List<string> _tagNames = new List<string> { "name:en", "int_name", "name", "name:ru" };
 

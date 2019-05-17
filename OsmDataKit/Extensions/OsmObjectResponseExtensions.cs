@@ -10,24 +10,25 @@ namespace OsmDataKit
                 .Concat(response.RootWays.Values)
                 .Concat(response.RootRelations.Values);
 
-        public static IEnumerable<NodeObject> AllNodes(this OsmObjectResponse response) =>
+        public static IEnumerable<NodeObject> DeepNodes(this OsmObjectResponse response) =>
             response.RootNodes.Values
-                .Concat(response.AllWays().SelectMany(i => i.Nodes))
-                .Concat(response.AllRelations().SelectMany(i => i.AllNodes()));
+                .Concat(response.DeepWays().SelectMany(i => i.Nodes))
+                .Concat(response.DeepRelations().SelectMany(i => i.DeepNodes()))
+                .Distinct();
 
-        public static IEnumerable<WayObject> AllWays(this OsmObjectResponse response) =>
+        public static IEnumerable<WayObject> DeepWays(this OsmObjectResponse response) =>
             response.RootWays.Values
-                .Concat(response.AllRelations().SelectMany(i => i.AllWays()))
+                .Concat(response.DeepRelations().SelectMany(i => i.DeepWays()))
                 .Distinct();
 
-        public static IEnumerable<RelationObject> AllRelations(this OsmObjectResponse response) =>
+        public static IEnumerable<RelationObject> DeepRelations(this OsmObjectResponse response) =>
             response.RootRelations.Values
-                .Concat(response.RootRelations.Values.SelectMany(i => i.AllRelations()))
+                .Concat(response.RootRelations.Values.SelectMany(i => i.DeepRelations()))
                 .Distinct();
 
-        public static IEnumerable<GeoObject> AllObjects(this OsmObjectResponse response) =>
-            (response.AllNodes() as IEnumerable<GeoObject>)
-                .Concat(response.AllWays())
-                .Concat(response.AllRelations());
+        public static IEnumerable<GeoObject> DeepObjects(this OsmObjectResponse response) =>
+            (response.DeepNodes() as IEnumerable<GeoObject>)
+                .Concat(response.DeepWays())
+                .Concat(response.DeepRelations());
     }
 }
