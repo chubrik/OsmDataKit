@@ -3,15 +3,15 @@ using System.Diagnostics;
 
 namespace OsmDataKit
 {
-    public class GeoCoords : IGeoCoords
+    public class GeoPoint : IGeoPoint
     {
         public float Latitude { get; }
         public float Longitude { get; }
 
-        public GeoCoords(double latitude, double longitude) 
+        public GeoPoint(double latitude, double longitude) 
             : this((float)latitude, (float)longitude) { }
 
-        public GeoCoords(float latitude, float longitude)
+        public GeoPoint(float latitude, float longitude)
         {
             Debug.Assert(latitude >= -90 && latitude <= 90);
             Debug.Assert(longitude >= -180 && longitude <= 180);

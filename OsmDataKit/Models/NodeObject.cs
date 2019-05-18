@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace OsmDataKit
 {
     [JsonObject]
-    public class NodeObject : GeoObject, IGeoCoords
+    public class NodeObject : GeoObject, IGeoPoint
     {
         public override OsmGeoType Type => OsmGeoType.Node;
 
@@ -42,8 +42,8 @@ namespace OsmDataKit
             Longitude = (float)node.Longitude.GetValueOrDefault();
         }
 
-        [JsonProperty("c")]
-        public float[] _coords
+        [JsonProperty("p")]
+        public float[] _point
         {
             get => new[] { Latitude, Longitude };
             set

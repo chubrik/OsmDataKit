@@ -10,9 +10,9 @@ namespace OsmDataKit.Tests
         private const string SrcPath = "../$data/antarctica.osm.pbf";
 
         [TestMethod]
-        public void LoadPredicate()
+        public void LoadByFilter()
         {
-            TestInitialize(nameof(LoadPredicate));
+            TestInitialize(nameof(LoadByFilter));
             var response = OsmService.Load(SrcPath, i => i.Tags.ContainsKey("place"));
             Assert.IsTrue(response.Nodes.Count > 100);
             Assert.IsTrue(response.Ways.Count > 5000);

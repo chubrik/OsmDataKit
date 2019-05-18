@@ -1,6 +1,6 @@
 ﻿namespace OsmDataKit
 {
-    public interface IGeoCoords
+    public interface IGeoPoint
     {
         float Latitude { get; }
         float Longitude { get; }

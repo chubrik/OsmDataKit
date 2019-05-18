@@ -22,7 +22,7 @@ namespace OsmDataKit
             LogService.BeginInfo($"OSM validation: {pbfPath}");
             var previousType = OsmGeoType.Node;
             long? previousId = 0;
-            long count = 0;
+            long thisCount = 0;
             long totalCount = 0;
             long noIdCount = 0;
 
@@ -30,24 +30,24 @@ namespace OsmDataKit
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
-                foreach (var entry in source)
+                foreach (var osmGeo in source)
                 {
-                    if (entry.Type > previousType)
+                    if (osmGeo.Type > previousType)
                     {
-                        LogService.LogInfo($"Found {count} {previousType.ToString().ToLower()}s");
-                        totalCount += count;
-                        count = 0;
-                        previousType = entry.Type;
+                        LogService.LogInfo($"Found {thisCount} {previousType.ToString().ToLower()}s");
+                        totalCount += thisCount;
+                        thisCount = 0;
+                        previousType = osmGeo.Type;
                         previousId = 0;
                     }
 
-                    count++;
-                    var id = entry.Id;
+                    thisCount++;
+                    var id = osmGeo.Id;
 
                     if (id != null)
                     {
-                        if (entry.Type < previousType || id < previousId)
-                            LogService.LogWarning($"Was: {previousType}-{previousId}, now: {entry.Type}-{id}");
+                        if (osmGeo.Type < previousType || id < previousId)
+                            LogService.LogWarning($"Was: {previousType}-{previousId}, now: {osmGeo.Type}-{id}");
 
                         previousId = id;
                     }
@@ -56,8 +56,8 @@ namespace OsmDataKit
                 }
             }
 
-            totalCount += count;
-            LogService.LogInfo($"Found {count} {previousType.ToString().ToLower()}s");
+            totalCount += thisCount;
+            LogService.LogInfo($"Found {thisCount} {previousType.ToString().ToLower()}s");
             LogService.LogInfo($"Total {totalCount} entries");
 
             if (noIdCount > 0)
@@ -70,39 +70,39 @@ namespace OsmDataKit
 
         #region Load
 
-        public static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> predicate)
+        public static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> filter)
         {
             Debug.Assert(pbfPath != null);
-            Debug.Assert(predicate != null);
+            Debug.Assert(filter != null);
 
             if (pbfPath == null)
                 throw new ArgumentNullException(nameof(pbfPath));
 
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
 
             LogService.BeginInfo("Load OSM data");
-            var nodes = new Dictionary<long, NodeObject>();
-            var ways = new Dictionary<long, WayObject>();
-            var relations = new Dictionary<long, RelationObject>();
+            var foundNodes = new Dictionary<long, NodeObject>();
+            var foundWays = new Dictionary<long, WayObject>();
+            var foundRelations = new Dictionary<long, RelationObject>();
 
             using (var fileStream = FileClient.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
-                foreach (var osmGeo in source.Where(predicate))
+                foreach (var osmGeo in source.Where(filter))
                     switch (osmGeo.Type)
                     {
                         case OsmGeoType.Node:
-                            nodes.Add(osmGeo.Id.GetValueOrDefault(), new NodeObject(osmGeo as Node));
+                            foundNodes.Add(osmGeo.Id.GetValueOrDefault(), new NodeObject(osmGeo as Node));
                             break;
 
                         case OsmGeoType.Way:
-                            ways.Add(osmGeo.Id.GetValueOrDefault(), new WayObject(osmGeo as Way));
+                            foundWays.Add(osmGeo.Id.GetValueOrDefault(), new WayObject(osmGeo as Way));
                             break;
 
                         case OsmGeoType.Relation:
-                            relations.Add(osmGeo.Id.GetValueOrDefault(), new RelationObject(osmGeo as Relation));
+                            foundRelations.Add(osmGeo.Id.GetValueOrDefault(), new RelationObject(osmGeo as Relation));
                             break;
 
                         default:
@@ -110,9 +110,9 @@ namespace OsmDataKit
                     }
             }
 
-            LogService.LogInfo($"Loaded: {nodes.Count} nodes, {ways.Count} ways, {relations.Count} relations");
+            LogService.LogInfo($"Loaded: {foundNodes.Count} nodes, {foundWays.Count} ways, {foundRelations.Count} relations");
             LogService.EndInfo("Load OSM data completed");
-            return new OsmResponse { Nodes = nodes, Ways = ways, Relations = relations };
+            return new OsmResponse { Nodes = foundNodes, Ways = foundWays, Relations = foundRelations };
         }
 
         public static OsmResponse Load(string pbfPath, OsmRequest request)
@@ -290,21 +290,21 @@ namespace OsmDataKit
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return LoadObjects(pbfPath, cacheName, request, predicate: null, stepLimit);
+            return LoadObjects(pbfPath, cacheName, request, filter: null, stepLimit);
         }
 
-        public static OsmObjectResponse LoadObjects(string pbfPath, string cacheName, Func<OsmGeo, bool> predicate, int stepLimit = 0)
+        public static OsmObjectResponse LoadObjects(string pbfPath, string cacheName, Func<OsmGeo, bool> filter, int stepLimit = 0)
         {
-            Debug.Assert(predicate != null);
+            Debug.Assert(filter != null);
 
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
 
-            return LoadObjects(pbfPath, cacheName, request: null, predicate, stepLimit);
+            return LoadObjects(pbfPath, cacheName, request: null, filter, stepLimit);
         }
 
         private static OsmObjectResponse LoadObjects(
-            string pbfPath, string cacheName, OsmRequest request, Func<OsmGeo, bool> predicate, int stepLimit)
+            string pbfPath, string cacheName, OsmRequest request, Func<OsmGeo, bool> filter, int stepLimit)
         {
             Debug.Assert(pbfPath != null);
             Debug.Assert(!cacheName.IsNullOrWhiteSpace());
@@ -320,12 +320,12 @@ namespace OsmDataKit
                 throw new ArgumentOutOfRangeException(nameof(stepLimit));
 
             var cachePath = FullCachePath(cacheName);
-            OsmResponse response;
+            OsmResponse context;
 
             if (FileClient.Exists(cachePath))
             {
-                response = JsonFileClient.Read<OsmResponse>(cachePath);
-                return BuildObjects(response);
+                context = JsonFileClient.Read<OsmResponse>(cachePath);
+                return BuildObjects(context);
             }
 
             if (!FileClient.Exists(pbfPath))
@@ -335,68 +335,68 @@ namespace OsmDataKit
             var cacheStepPath = StepCachePath(cacheName, 1);
 
             if (FileClient.Exists(cacheStepPath))
-                response = JsonFileClient.Read<OsmResponse>(cacheStepPath);
+                context = JsonFileClient.Read<OsmResponse>(cacheStepPath);
             else
             {
                 LogService.LogInfo($"Step 1");
 
                 if (request != null)
-                    response = Load(pbfPath, request);
+                    context = Load(pbfPath, request);
                 else
-                if (predicate != null)
-                    response = Load(pbfPath, predicate);
+                if (filter != null)
+                    context = Load(pbfPath, filter);
                 else
                     throw new InvalidOperationException();
 
-                JsonFileClient.Write(cacheStepPath, response);
+                JsonFileClient.Write(cacheStepPath, context);
             }
 
             if (stepLimit != 1)
                 for (var step = 2; stepLimit == 0 || step <= stepLimit; step++)
-                    if (!FillNested(pbfPath, cacheName, response, step))
+                    if (!LoadStep(pbfPath, cacheName, context, step))
                         break;
 
             LogService.Begin("Distinct & sort missed ids");
-            response.MissedNodeIds = response.MissedNodeIds.Distinct().OrderBy(i => i).ToList();
-            response.MissedWayIds = response.MissedWayIds.Distinct().OrderBy(i => i).ToList();
-            response.MissedRelationIds = response.MissedRelationIds.Distinct().OrderBy(i => i).ToList();
+            context.MissedNodeIds = context.MissedNodeIds.Distinct().OrderBy(i => i).ToList();
+            context.MissedWayIds = context.MissedWayIds.Distinct().OrderBy(i => i).ToList();
+            context.MissedRelationIds = context.MissedRelationIds.Distinct().OrderBy(i => i).ToList();
             LogService.End("Distinct & sort missed ids completed");
 
             LogService.LogInfo(
-                $"Loaded: {response.Nodes.Count} nodes, {response.Ways.Count} ways, {response.Relations.Count} relations");
+                $"Loaded: {context.Nodes.Count} nodes, {context.Ways.Count} ways, {context.Relations.Count} relations");
 
-            if (response.MissedNodeIds.Count > 0 || response.MissedWayIds.Count > 0 || response.MissedRelationIds.Count > 0)
+            if (context.MissedNodeIds.Count > 0 || context.MissedWayIds.Count > 0 || context.MissedRelationIds.Count > 0)
                 LogService.LogWarning(
-                    $"Missed: {response.MissedNodeIds.Count} nodes, " +
-                    $"{response.MissedWayIds.Count} ways, " +
-                    $"{response.MissedRelationIds.Count} relations");
+                    $"Missed: {context.MissedNodeIds.Count} nodes, " +
+                    $"{context.MissedWayIds.Count} ways, " +
+                    $"{context.MissedRelationIds.Count} relations");
 
-            JsonFileClient.Write(FullCachePath(cacheName), response);
-            var objects = BuildObjects(response);
+            JsonFileClient.Write(FullCachePath(cacheName), context);
+            var objects = BuildObjects(context);
             LogService.EndInfo("Load OSM objects completed");
             return objects;
         }
 
-        private static bool FillNested(string pbfPath, string cacheName, OsmResponse response, int step)
+        private static bool LoadStep(string pbfPath, string cacheName, OsmResponse context, int step)
         {
             var cacheStepPath = StepCachePath(cacheName, step);
-            OsmResponse newResponse;
+            OsmResponse response;
 
             if (FileClient.Exists(cacheStepPath))
-                newResponse = JsonFileClient.Read<OsmResponse>(cacheStepPath);
+                response = JsonFileClient.Read<OsmResponse>(cacheStepPath);
             else
             {
                 LogService.Begin("Calculate next request");
 
-                var nodes = response.Nodes;
-                var ways = response.Ways;
-                var relations = response.Relations;
-                var missedNodeIds = new HashSet<long>(response.MissedNodeIds);
-                var missedWayIds = new HashSet<long>(response.MissedWayIds);
-                var missedRelationIds = new HashSet<long>(response.MissedRelationIds);
+                var nodes = context.Nodes;
+                var ways = context.Ways;
+                var relations = context.Relations;
+                var missedNodeIds = new HashSet<long>(context.MissedNodeIds);
+                var missedWayIds = new HashSet<long>(context.MissedWayIds);
+                var missedRelationIds = new HashSet<long>(context.MissedRelationIds);
 
-                var wayNodeIds = response.Ways.Values.SelectMany(i => i.MissedNodeIds);
-                var relMembers = response.Relations.Values.SelectMany(i => i.MissedMembers).ToList();
+                var wayNodeIds = context.Ways.Values.SelectMany(i => i.MissedNodeIds);
+                var relMembers = context.Relations.Values.SelectMany(i => i.MissedMembers).ToList();
                 var relNodeIds = relMembers.Where(i => i.Type == OsmGeoType.Node).Select(i => i.Id);
                 var relWayIds = relMembers.Where(i => i.Type == OsmGeoType.Way).Select(i => i.Id);
                 var relRelIds = relMembers.Where(i => i.Type == OsmGeoType.Relation).Select(i => i.Id);
@@ -418,36 +418,34 @@ namespace OsmDataKit
                 if (needNodeIds.Count == 0 && needWayIds.Count == 0 && needRelIds.Count == 0)
                     return false;
 
-                var newRequest = new OsmRequest { NodeIds = needNodeIds, WayIds = needWayIds, RelationIds = needRelIds };
-
                 LogService.LogInfo($"Step {step}");
-                newResponse = Load(pbfPath, newRequest);
-                JsonFileClient.Write(cacheStepPath, newResponse);
+                response = Load(pbfPath, new OsmRequest { NodeIds = needNodeIds, WayIds = needWayIds, RelationIds = needRelIds });
+                JsonFileClient.Write(cacheStepPath, response);
             }
 
             LogService.Begin("Merge data");
-            response.Nodes.AddRange(newResponse.Nodes);
-            response.Ways.AddRange(newResponse.Ways);
-            response.Relations.AddRange(newResponse.Relations);
-            response.MissedNodeIds.AddRange(newResponse.MissedNodeIds);
-            response.MissedWayIds.AddRange(newResponse.MissedWayIds);
-            response.MissedRelationIds.AddRange(newResponse.MissedRelationIds);
+            context.Nodes.AddRange(response.Nodes);
+            context.Ways.AddRange(response.Ways);
+            context.Relations.AddRange(response.Relations);
+            context.MissedNodeIds.AddRange(response.MissedNodeIds);
+            context.MissedWayIds.AddRange(response.MissedWayIds);
+            context.MissedRelationIds.AddRange(response.MissedRelationIds);
             LogService.End("Merge data completed");
 
             return true;
         }
 
-        private static OsmObjectResponse BuildObjects(OsmResponse response)
+        private static OsmObjectResponse BuildObjects(OsmResponse context)
         {
             LogService.Begin("Build geo objects");
-            var allNodes = response.Nodes;
-            var allWays = response.Ways;
-            var allRelations = response.Relations;
+            var allNodes = context.Nodes;
+            var allWays = context.Ways;
+            var allRelations = context.Relations;
 
             foreach (var way in allWays.Values)
             {
-                var nodes = way.MissedNodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList();
-                way.FillNodes(nodes);
+                var wayNodes = way.MissedNodeIds.Where(allNodes.ContainsKey).Select(i => allNodes[i]).ToList();
+                way.FillNodes(wayNodes);
             }
 
             foreach (var relation in allRelations.Values)
@@ -500,9 +498,9 @@ namespace OsmDataKit
                 RootNodes = rootNodes,
                 RootWays = rootWays,
                 RootRelations = rootRelations,
-                MissedNodeIds = response.MissedNodeIds,
-                MissedWayIds = response.MissedWayIds,
-                MissedRelationIds = response.MissedRelationIds
+                MissedNodeIds = context.MissedNodeIds,
+                MissedWayIds = context.MissedWayIds,
+                MissedRelationIds = context.MissedRelationIds
             };
 
             LogService.End("Build geo objects completed");

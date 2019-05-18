@@ -4,46 +4,46 @@ using System.Diagnostics;
 
 namespace OsmDataKit
 {
-    public static class GeoCoordsExtensions
+    public static class GeoPointExtensions
     {
-        public static GeoCoords AverageCoords(this IEnumerable<IGeoCoords> coordsColletion)
+        public static GeoPoint CenterPoint(this IEnumerable<IGeoPoint> points)
         {
-            Debug.Assert(coordsColletion != null);
+            Debug.Assert(points != null);
 
-            if (coordsColletion == null)
-                throw new ArgumentNullException(nameof(coordsColletion));
+            if (points == null)
+                throw new ArgumentNullException(nameof(points));
 
             var minLat = float.NaN;
             var maxLat = float.NaN;
             var minLng = float.NaN;
             var maxLng = float.NaN;
 
-            foreach (var coords in coordsColletion)
+            foreach (var point in points)
             {
                 if (float.IsNaN(minLat))
                 {
-                    minLat = maxLat = coords.Latitude;
-                    minLng = maxLng = coords.Longitude;
+                    minLat = maxLat = point.Latitude;
+                    minLng = maxLng = point.Longitude;
                     continue;
                 }
 
-                if (minLat > coords.Latitude)
-                    minLat = coords.Latitude;
+                if (minLat > point.Latitude)
+                    minLat = point.Latitude;
                 else
-                if (maxLat < coords.Latitude)
-                    maxLat = coords.Latitude;
+                if (maxLat < point.Latitude)
+                    maxLat = point.Latitude;
 
-                if (minLng > coords.Longitude)
-                    minLng = coords.Longitude;
+                if (minLng > point.Longitude)
+                    minLng = point.Longitude;
                 else
-                if (maxLng < coords.Longitude)
-                    maxLng = coords.Longitude;
+                if (maxLng < point.Longitude)
+                    maxLng = point.Longitude;
             }
 
             if (float.IsNaN(minLat))
-                throw new ArgumentException(nameof(coordsColletion));
+                throw new ArgumentException(nameof(points));
 
-            return new GeoCoords((minLat + maxLat) / 2, (minLng + maxLng) / 2);
+            return new GeoPoint((minLat + maxLat) / 2, (minLng + maxLng) / 2);
         }
     }
 }

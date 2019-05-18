@@ -17,6 +17,7 @@ namespace OsmDataKit
         public static IEnumerable<RelationObject> DeepRelations(this RelationObject relation)
         {
             var relations = relation.Members.Relations().ToList();
+
             return relations.Concat(relations.SelectMany(DeepRelations))
                             .Distinct();
         }
