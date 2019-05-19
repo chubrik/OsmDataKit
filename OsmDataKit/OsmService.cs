@@ -10,6 +10,8 @@ namespace OsmDataKit
 {
     public static class OsmService
     {
+        private const string CacheDir = "$osm-cache";
+
         #region Validate
 
         public static void ValidateSource(string pbfPath)
@@ -71,9 +73,9 @@ namespace OsmDataKit
         #region Load
 
         public static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> filter) =>
-            Load(pbfPath, filter, getAllRelations: false);
+            Load(pbfPath, filter, loadAllRelations: false);
 
-        private static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> filter, bool getAllRelations)
+        private static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> filter, bool loadAllRelations)
         {
             Debug.Assert(pbfPath != null);
             Debug.Assert(filter != null);
@@ -88,7 +90,7 @@ namespace OsmDataKit
             var foundNodes = new Dictionary<long, NodeObject>();
             var foundWays = new Dictionary<long, WayObject>();
             var foundRelations = new Dictionary<long, RelationObject>();
-            var allRelations = getAllRelations ? new Dictionary<long, RelationObject>() : null;
+            var allRelations = loadAllRelations ? new Dictionary<long, RelationObject>() : null;
 
             using (var fileStream = FileClient.OpenRead(pbfPath))
             {
@@ -114,7 +116,7 @@ namespace OsmDataKit
                         case OsmGeoType.Relation:
                             RelationObject relation = null;
 
-                            if (getAllRelations)
+                            if (loadAllRelations)
                                 allRelations.Add(osmGeo.Id.GetValueOrDefault(), relation = new RelationObject(osmGeo as Relation));
 
                             if (filter(osmGeo))
@@ -133,9 +135,9 @@ namespace OsmDataKit
         }
 
         public static OsmResponse Load(string pbfPath, OsmRequest request) =>
-            Load(pbfPath, request, getAllRelations: false);
+            Load(pbfPath, request, loadAllRelations: false);
 
-        private static OsmResponse Load(string pbfPath, OsmRequest request, bool getAllRelations)
+        private static OsmResponse Load(string pbfPath, OsmRequest request, bool loadAllRelations)
         {
             Debug.Assert(pbfPath != null);
             Debug.Assert(request != null);
@@ -163,7 +165,7 @@ namespace OsmDataKit
             var foundNodes = new Dictionary<long, NodeObject>();
             var foundWays = new Dictionary<long, WayObject>();
             var foundRelations = new Dictionary<long, RelationObject>();
-            var allRelations = getAllRelations ? new Dictionary<long, RelationObject>() : null;
+            var allRelations = loadAllRelations ? new Dictionary<long, RelationObject>() : null;
             List<long> missedNodeIds = null;
             List<long> missedWayIds = null;
             List<long> missedRelationIds = null;
@@ -211,7 +213,7 @@ namespace OsmDataKit
 
                             LogService.LogInfo("Loaded 0 ways");
 
-                            if (requestRelationIds.Count > 0 || getAllRelations)
+                            if (requestRelationIds.Count > 0 || loadAllRelations)
                             {
                                 thisType = OsmGeoType.Relation;
                                 continue;
@@ -247,7 +249,7 @@ namespace OsmDataKit
                             else
                                 LogService.LogWarning($"{logMessage} ({missedWayIds.Count} missed)");
 
-                            if (requestRelationIds.Count > 0 || getAllRelations)
+                            if (requestRelationIds.Count > 0 || loadAllRelations)
                             {
                                 thisType = OsmGeoType.Relation;
                                 continue;
@@ -263,14 +265,14 @@ namespace OsmDataKit
                             id = osmGeo.Id.GetValueOrDefault();
                             RelationObject relation = null;
 
-                            if (getAllRelations)
+                            if (loadAllRelations)
                                 allRelations.Add(id, relation = new RelationObject(osmGeo as Relation));
 
                             if (requestRelationIds.Contains(id))
                             {
                                 foundRelations.Add(id, relation ?? new RelationObject(osmGeo as Relation));
 
-                                if (!getAllRelations && foundRelations.Count == requestRelationIds.Count)
+                                if (!loadAllRelations && foundRelations.Count == requestRelationIds.Count)
                                     goto Complete;
                             }
 
@@ -317,7 +319,7 @@ namespace OsmDataKit
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return LoadObjects(pbfPath, cacheName, request, filter: null, stepLimit, getAllRelations: !lowMemoryMode);
+            return LoadObjects(pbfPath, cacheName, request, filter: null, stepLimit, loadAllRelations: !lowMemoryMode);
         }
 
         public static OsmObjectResponse LoadObjects(
@@ -328,11 +330,11 @@ namespace OsmDataKit
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
 
-            return LoadObjects(pbfPath, cacheName, request: null, filter, stepLimit, getAllRelations: !lowMemoryMode);
+            return LoadObjects(pbfPath, cacheName, request: null, filter, stepLimit, loadAllRelations: !lowMemoryMode);
         }
 
         private static OsmObjectResponse LoadObjects(
-            string pbfPath, string cacheName, OsmRequest request, Func<OsmGeo, bool> filter, int stepLimit, bool getAllRelations)
+            string pbfPath, string cacheName, OsmRequest request, Func<OsmGeo, bool> filter, int stepLimit, bool loadAllRelations)
         {
             Debug.Assert(pbfPath != null);
             Debug.Assert(!cacheName.IsNullOrWhiteSpace());
@@ -347,20 +349,21 @@ namespace OsmDataKit
             if (stepLimit < 0)
                 throw new ArgumentOutOfRangeException(nameof(stepLimit));
 
-            var cachePath = FullCachePath(cacheName);
+            var cacheFullPath = GetCacheFullPath(cacheName);
             OsmResponse context;
 
-            if (FileClient.Exists(cachePath))
+            if (FileClient.Exists(cacheFullPath))
             {
-                context = JsonFileClient.Read<OsmResponse>(cachePath);
+                context = JsonFileClient.Read<OsmResponse>(cacheFullPath);
                 return BuildObjects(context);
             }
 
             if (!FileClient.Exists(pbfPath))
                 throw new InvalidOperationException();
 
-            LogService.BeginInfo("Load OSM objects" + (getAllRelations ? string.Empty : " (low memory mode)"));
-            var cacheStepPath = StepCachePath(cacheName, 1);
+            LogService.BeginInfo("Load OSM objects" + (loadAllRelations ? string.Empty : " (low memory mode)"));
+            var cacheStepPath = GetCacheStepPath(cacheName, 1);
+            var doneSteps = 1;
 
             if (FileClient.Exists(cacheStepPath))
                 context = JsonFileClient.Read<OsmResponse>(cacheStepPath);
@@ -369,23 +372,28 @@ namespace OsmDataKit
                 LogService.LogInfo($"Step 1");
 
                 if (request != null)
-                    context = Load(pbfPath, request, getAllRelations);
+                    context = Load(pbfPath, request, loadAllRelations);
                 else
                 if (filter != null)
-                    context = Load(pbfPath, filter, getAllRelations);
+                    context = Load(pbfPath, filter, loadAllRelations);
                 else
                     throw new InvalidOperationException();
 
-                if (getAllRelations)
-                    FindRelations(context);
+                if (loadAllRelations)
+                    FilterAllRelations(context);
 
                 JsonFileClient.Write(cacheStepPath, context);
             }
 
             if (stepLimit != 1)
                 for (var step = 2; stepLimit == 0 || step <= stepLimit; step++)
-                    if (!LoadStep(pbfPath, cacheName, context, step))
+                {
+                    var needNextStep = LoadStep(pbfPath, cacheName, context, step);
+                    doneSteps = step;
+
+                    if (!needNextStep)
                         break;
+                }
 
             LogService.Begin("Distinct & sort missed ids");
             context.MissedNodeIds = context.MissedNodeIds.Distinct().OrderBy(i => i).ToList();
@@ -402,13 +410,20 @@ namespace OsmDataKit
                     $"{context.MissedWayIds.Count} ways, " +
                     $"{context.MissedRelationIds.Count} relations");
 
-            JsonFileClient.Write(FullCachePath(cacheName), context);
+            JsonFileClient.Write(cacheFullPath, context);
+
+            if (!FileClient.Exists(cacheFullPath))
+                throw new InvalidOperationException();
+
+            for (var i = 1; i <= doneSteps; i++)
+                FileClient.Delete(GetCacheStepPath(cacheName, i));
+
             var objects = BuildObjects(context);
             LogService.EndInfo("Load OSM objects completed");
             return objects;
         }
 
-        private static void FindRelations(OsmResponse context)
+        private static void FilterAllRelations(OsmResponse context)
         {
             Debug.Assert(context.AllRelations != null);
 
@@ -451,7 +466,7 @@ namespace OsmDataKit
 
         private static bool LoadStep(string pbfPath, string cacheName, OsmResponse context, int step)
         {
-            var cacheStepPath = StepCachePath(cacheName, step);
+            var cacheStepPath = GetCacheStepPath(cacheName, step);
             OsmResponse response;
 
             if (FileClient.Exists(cacheStepPath))
@@ -579,9 +594,9 @@ namespace OsmDataKit
             return objects;
         }
 
-        private static string FullCachePath(string cacheName) => $"$osm-cache/{cacheName}.json";
+        private static string GetCacheFullPath(string cacheName) => $"{CacheDir}/{cacheName}.json";
 
-        private static string StepCachePath(string cacheName, int step) => $"$osm-cache/{cacheName} - step {step}.json";
+        private static string GetCacheStepPath(string cacheName, int step) => $"{CacheDir}/{cacheName} - step {step}.json";
 
         #endregion
     }
