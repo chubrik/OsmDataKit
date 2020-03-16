@@ -4,12 +4,11 @@ namespace OsmDataKit
 {
     public sealed class OsmObjectResponse
     {
-        public IReadOnlyDictionary<long, NodeObject> RootNodes { get; set; }
-        public IReadOnlyDictionary<long, WayObject> RootWays { get; set; }
-        public IReadOnlyDictionary<long, RelationObject> RootRelations { get; set; }
-
-        public List<long> MissedNodeIds { get; set; }
-        public List<long> MissedWayIds { get; set; }
-        public List<long> MissedRelationIds { get; set; }
+        public IReadOnlyList<NodeObject> RootNodes { get; internal set; }
+        public IReadOnlyList<WayObject> RootWays { get; internal set; }
+        public IReadOnlyList<RelationObject> RootRelations { get; internal set; }
+        public IReadOnlyList<long> MissedNodeIds { get; internal set; }
+        public IReadOnlyList<long> MissedWayIds { get; internal set; }
+        public IReadOnlyList<long> MissedRelationIds { get; internal set; }
     }
 }

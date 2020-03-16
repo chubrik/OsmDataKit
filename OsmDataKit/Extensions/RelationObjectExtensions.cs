@@ -16,14 +16,13 @@ namespace OsmDataKit
 
         public static IEnumerable<RelationObject> DeepRelations(this RelationObject relation)
         {
-            var relations = relation.Members.Relations().ToList();
+            var memberRelations = relation.Members.Relations().ToList();
 
-            return relations.Concat(relations.SelectMany(DeepRelations))
-                            .Distinct();
+            return memberRelations.Concat(memberRelations.SelectMany(DeepRelations))
+                                  .Distinct();
         }
 
         public static bool IsCompleted(this RelationObject relation) =>
-            (relation.MissedMembers == null || relation.MissedMembers.Count == 0) &&
-            relation.Members.All(i => i.Geo.IsCompleted());
+            relation.MissedMembers == null && relation.Members.All(i => i.Geo.IsCompleted());
     }
 }

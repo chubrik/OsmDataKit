@@ -1,57 +1,45 @@
 ﻿using Newtonsoft.Json;
+using OsmDataKit.Internal;
 using OsmSharp;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace OsmDataKit
 {
-    [JsonObject]
-    public class NodeObject : GeoObject, IGeoPoint
+    [JsonConverter(typeof(NodeObjectConverter))]
+    public class NodeObject : GeoObject
     {
         public override OsmGeoType Type => OsmGeoType.Node;
 
-        [JsonIgnore]
-        public float Latitude { get; set; }
+        public Location Location { get; }
 
-        [JsonIgnore]
-        public float Longitude { get; set; }
+        public float Latitude => Location.Latitude;
 
-        public NodeObject() { }
+        public float Longitude => Location.Longitude;
+
+        public NodeObject(
+            long id, double latitude, double longitude, Dictionary<string, string> tags = null)
+            : base(id, tags)
+        {
+            Location = new Location(latitude, longitude);
+        }
 
         public NodeObject(
             long id, float latitude, float longitude, Dictionary<string, string> tags = null)
             : base(id, tags)
         {
-            Debug.Assert(latitude >= -90 && latitude <= 90);
-            Debug.Assert(longitude >= -180 && longitude <= 180);
-
-            if (latitude < -90 || latitude > 90)
-                throw new ArgumentOutOfRangeException(nameof(latitude));
-
-            if (longitude < -180 || longitude > 180)
-                throw new ArgumentOutOfRangeException(nameof(longitude));
-
-            Latitude = latitude;
-            Longitude = longitude;
+            Location = new Location(latitude, longitude);
         }
 
-        internal NodeObject(Node node) : base(node)
+        public NodeObject(
+            long id, Location location, Dictionary<string, string> tags = null)
+            : base(id, tags)
         {
-            Latitude = (float)node.Latitude.GetValueOrDefault();
-            Longitude = (float)node.Longitude.GetValueOrDefault();
+            Location = location;
         }
 
-        [JsonProperty("p")]
-        public float[] _point
+        public NodeObject(Node node) : base(node)
         {
-            get => new[] { Latitude, Longitude };
-            set
-            {
-                Debug.Assert(value?.Length == 2);
-                Latitude = value[0];
-                Longitude = value[1];
-            }
+            Location = new Location(node.Latitude.Value, node.Longitude.Value);
         }
     }
 }

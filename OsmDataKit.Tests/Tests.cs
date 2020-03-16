@@ -41,7 +41,7 @@ namespace OsmDataKit.Tests
             Assert.IsTrue(response.MissedWayIds.Count == 0);
             Assert.IsTrue(response.MissedRelationIds.Count == 0);
 
-            var relation = response.RootRelations.Values.Single();
+            var relation = response.RootRelations.Single();
 
             Assert.IsTrue(relation.Type == OsmGeoType.Relation);
             Assert.IsTrue(relation.Id == relationId);

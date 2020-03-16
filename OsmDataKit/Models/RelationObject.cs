@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
@@ -7,26 +8,19 @@ using System.Linq;
 
 namespace OsmDataKit
 {
-    [JsonObject]
+    [JsonConverter(typeof(RelationObjectConverter))]
     public class RelationObject : GeoObject
     {
         public override OsmGeoType Type => OsmGeoType.Relation;
 
-        [JsonIgnore]
-        public IReadOnlyList<RelationMemberObject> Members { get; set; }
+        public IReadOnlyList<RelationMemberObject> Members { get; private set; }
 
-        [JsonProperty("m")]
-        public IReadOnlyList<RelationMemberInfo> MissedMembers { get; set; }
-
-        public RelationObject() { }
+        public IReadOnlyList<RelationMemberInfo> MissedMembers { get; private set; }
 
         public RelationObject(
             long id, IReadOnlyList<RelationMemberObject> members, Dictionary<string, string> tags = null)
             : base(id, tags)
         {
-            Debug.Assert(members != null);
-            Debug.Assert(members?.Count > 0);
-
             if (members == null)
                 throw new ArgumentNullException(nameof(members));
 
@@ -36,27 +30,28 @@ namespace OsmDataKit
             Members = members;
         }
 
-        internal RelationObject(Relation relation) : base(relation)
+        public RelationObject(
+            long id, IReadOnlyList<RelationMemberInfo> members, Dictionary<string, string> tags = null)
+            : base(id, tags)
         {
-            MissedMembers = relation.Members.Select(i =>
-                new RelationMemberInfo { Role = i.Role, Type = i.Type, Id = i.Id })
-                .ToList();
+            if (members == null)
+                throw new ArgumentNullException(nameof(members));
+
+            if (members.Count == 0)
+                throw new ArgumentException(nameof(members));
+
+            MissedMembers = members;
         }
 
-        public void ReplaceMembers(IReadOnlyList<RelationMemberObject> members)
+        public RelationObject(Relation relation) : base(relation)
         {
-            Debug.Assert(members != null);
-            Debug.Assert(members?.Count > 0);
-
-            Members = members ?? throw new ArgumentNullException(nameof(members));
-            MissedMembers = null;
+            MissedMembers = relation.Members.Select(i => new RelationMemberInfo(i)).ToList();
         }
 
         internal void FillMembers(IReadOnlyList<RelationMemberObject> members)
         {
             Debug.Assert(Members == null);
-            Debug.Assert(members != null);
-            Debug.Assert(members?.Count > 0);
+            Debug.Assert(members.Count > 0);
 
             Members = members ?? throw new ArgumentNullException(nameof(members));
 

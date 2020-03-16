@@ -16,8 +16,6 @@ namespace OsmDataKit
 
         public static void ValidateSource(string pbfPath)
         {
-            Debug.Assert(pbfPath != null);
-
             if (pbfPath == null)
                 throw new ArgumentNullException(nameof(pbfPath));
 
@@ -77,9 +75,6 @@ namespace OsmDataKit
 
         private static OsmResponse Load(string pbfPath, Func<OsmGeo, bool> filter, bool loadAllRelations)
         {
-            Debug.Assert(pbfPath != null);
-            Debug.Assert(filter != null);
-
             if (pbfPath == null)
                 throw new ArgumentNullException(nameof(pbfPath));
 
@@ -102,14 +97,14 @@ namespace OsmDataKit
                         case OsmGeoType.Node:
 
                             if (filter(osmGeo))
-                                foundNodes.Add(osmGeo.Id.GetValueOrDefault(), new NodeObject(osmGeo as Node));
+                                foundNodes.Add(osmGeo.Id.Value, new NodeObject(osmGeo as Node));
 
                             break;
 
                         case OsmGeoType.Way:
 
                             if (filter(osmGeo))
-                                foundWays.Add(osmGeo.Id.GetValueOrDefault(), new WayObject(osmGeo as Way));
+                                foundWays.Add(osmGeo.Id.Value, new WayObject(osmGeo as Way));
 
                             break;
 
@@ -117,15 +112,15 @@ namespace OsmDataKit
                             RelationObject relation = null;
 
                             if (loadAllRelations)
-                                allRelations.Add(osmGeo.Id.GetValueOrDefault(), relation = new RelationObject(osmGeo as Relation));
+                                allRelations.Add(osmGeo.Id.Value, relation = new RelationObject(osmGeo as Relation));
 
                             if (filter(osmGeo))
-                                foundRelations.Add(osmGeo.Id.GetValueOrDefault(), relation ?? new RelationObject(osmGeo as Relation));
+                                foundRelations.Add(osmGeo.Id.Value, relation ?? new RelationObject(osmGeo as Relation));
 
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
+                            throw new InvalidOperationException();
                     }
             }
 
@@ -139,9 +134,6 @@ namespace OsmDataKit
 
         private static OsmResponse Load(string pbfPath, OsmRequest request, bool loadAllRelations)
         {
-            Debug.Assert(pbfPath != null);
-            Debug.Assert(request != null);
-
             if (pbfPath == null)
                 throw new ArgumentNullException(nameof(pbfPath));
 
@@ -184,7 +176,7 @@ namespace OsmDataKit
 
                             if (osmGeo.Type == OsmGeoType.Node)
                             {
-                                id = osmGeo.Id.GetValueOrDefault();
+                                id = osmGeo.Id.Value;
 
                                 if (requestNodeIds.Contains(id))
                                 {
@@ -228,7 +220,7 @@ namespace OsmDataKit
 
                             if (osmGeo.Type == OsmGeoType.Way)
                             {
-                                id = osmGeo.Id.GetValueOrDefault();
+                                id = osmGeo.Id.Value;
 
                                 if (requestWayIds.Contains(id))
                                 {
@@ -262,7 +254,7 @@ namespace OsmDataKit
                             if (osmGeo.Type < thisType)
                                 continue;
 
-                            id = osmGeo.Id.GetValueOrDefault();
+                            id = osmGeo.Id.Value;
                             RelationObject relation = null;
 
                             if (loadAllRelations)
@@ -279,7 +271,7 @@ namespace OsmDataKit
                             continue;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
+                            throw new InvalidOperationException();
                     }
             }
 
@@ -314,8 +306,6 @@ namespace OsmDataKit
         public static OsmObjectResponse LoadObjects(
             string pbfPath, string cacheName, OsmRequest request, int stepLimit = 0, bool lowMemoryMode = false)
         {
-            Debug.Assert(request != null);
-
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
@@ -325,8 +315,6 @@ namespace OsmDataKit
         public static OsmObjectResponse LoadObjects(
             string pbfPath, string cacheName, Func<OsmGeo, bool> filter, int stepLimit = 0, bool lowMemoryMode = false)
         {
-            Debug.Assert(filter != null);
-
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
 
@@ -336,10 +324,6 @@ namespace OsmDataKit
         private static OsmObjectResponse LoadObjects(
             string pbfPath, string cacheName, OsmRequest request, Func<OsmGeo, bool> filter, int stepLimit, bool loadAllRelations)
         {
-            Debug.Assert(pbfPath != null);
-            Debug.Assert(!cacheName.IsNullOrWhiteSpace());
-            Debug.Assert(stepLimit >= 0);
-
             if (pbfPath == null)
                 throw new ArgumentNullException(nameof(pbfPath));
 
@@ -545,26 +529,26 @@ namespace OsmDataKit
                         case OsmGeoType.Node:
 
                             if (allNodes.ContainsKey(memberInfo.Id))
-                                members.Add(new RelationMemberObject(memberInfo.Role, allNodes[memberInfo.Id]));
+                                members.Add(new RelationMemberObject(allNodes[memberInfo.Id], memberInfo.Role));
 
                             break;
 
                         case OsmGeoType.Way:
 
                             if (allWays.ContainsKey(memberInfo.Id))
-                                members.Add(new RelationMemberObject(memberInfo.Role, allWays[memberInfo.Id]));
+                                members.Add(new RelationMemberObject(allWays[memberInfo.Id], memberInfo.Role));
 
                             break;
 
                         case OsmGeoType.Relation:
 
                             if (allRelations.ContainsKey(memberInfo.Id))
-                                members.Add(new RelationMemberObject(memberInfo.Role, allRelations[memberInfo.Id]));
+                                members.Add(new RelationMemberObject(allRelations[memberInfo.Id], memberInfo.Role));
 
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(OsmGeoType));
+                            throw new InvalidOperationException();
                     }
 
                 allRelations[relation.Id].FillMembers(members);
@@ -576,9 +560,9 @@ namespace OsmDataKit
             var childWayIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Ways()).Select(i => i.Id));
             var childRelationIds = new HashSet<long>(allRelations.Values.SelectMany(i => i.Members.Relations()).Select(i => i.Id));
 
-            var rootNodes = allNodes.Values.Where(i => !childNodeIds.Contains(i.Id)).ToDictionary(i => i.Id);
-            var rootWays = allWays.Values.Where(i => !childWayIds.Contains(i.Id)).ToDictionary(i => i.Id);
-            var rootRelations = allRelations.Values.Where(i => !childRelationIds.Contains(i.Id)).ToDictionary(i => i.Id);
+            var rootNodes = allNodes.Values.Where(i => !childNodeIds.Contains(i.Id)).ToList();
+            var rootWays = allWays.Values.Where(i => !childWayIds.Contains(i.Id)).ToList();
+            var rootRelations = allRelations.Values.Where(i => !childRelationIds.Contains(i.Id)).ToList();
 
             var objects = new OsmObjectResponse
             {

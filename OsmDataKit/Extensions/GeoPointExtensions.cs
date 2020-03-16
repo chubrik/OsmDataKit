@@ -1,49 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace OsmDataKit
 {
-    public static class GeoPointExtensions
+    public static class LocationExtensions
     {
-        public static GeoPoint CenterPoint(this IEnumerable<IGeoPoint> points)
+        public static Location CenterLocation(this IEnumerable<Location> locations)
         {
-            Debug.Assert(points != null);
-
-            if (points == null)
-                throw new ArgumentNullException(nameof(points));
+            if (locations == null)
+                throw new ArgumentNullException(nameof(locations));
 
             var minLat = float.NaN;
             var maxLat = float.NaN;
             var minLng = float.NaN;
             var maxLng = float.NaN;
 
-            foreach (var point in points)
+            foreach (var location in locations)
             {
                 if (float.IsNaN(minLat))
                 {
-                    minLat = maxLat = point.Latitude;
-                    minLng = maxLng = point.Longitude;
+                    minLat = maxLat = location.Latitude;
+                    minLng = maxLng = location.Longitude;
                     continue;
                 }
 
-                if (minLat > point.Latitude)
-                    minLat = point.Latitude;
+                if (minLat > location.Latitude)
+                    minLat = location.Latitude;
                 else
-                if (maxLat < point.Latitude)
-                    maxLat = point.Latitude;
+                if (maxLat < location.Latitude)
+                    maxLat = location.Latitude;
 
-                if (minLng > point.Longitude)
-                    minLng = point.Longitude;
+                if (minLng > location.Longitude)
+                    minLng = location.Longitude;
                 else
-                if (maxLng < point.Longitude)
-                    maxLng = point.Longitude;
+                if (maxLng < location.Longitude)
+                    maxLng = location.Longitude;
             }
 
             if (float.IsNaN(minLat))
-                throw new ArgumentException(nameof(points));
+                throw new ArgumentException(nameof(locations));
 
-            return new GeoPoint((minLat + maxLat) / 2, (minLng + maxLng) / 2);
+            return new Location((minLat + maxLat) / 2, (minLng + maxLng) / 2);
         }
     }
 }

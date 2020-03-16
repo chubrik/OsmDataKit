@@ -1,23 +1,43 @@
-﻿using Newtonsoft.Json;
+﻿using Kit;
 using OsmSharp;
+using System;
 
 namespace OsmDataKit
 {
-    [JsonObject]
     public class RelationMemberInfo
     {
-        [JsonProperty("r")]
-        public string Role { get; set; }
+        public OsmGeoType Type { get; }
 
-        [JsonProperty("t")]
-        public OsmGeoType Type { get; set; }
+        public long Id { get; }
 
-        [JsonProperty("i")]
-        public long Id { get; set; }
+        public string Role { get; }
 
-        [JsonIgnore]
         public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
 
-        public override string ToString() => Role + " - " + Type.ToString()[0] + Id.ToString();
+        public RelationMemberInfo(OsmGeoType type, long id, string role)
+        {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id));
+
+            Type = type;
+            Id = id;
+
+            if (!role.IsNullOrWhiteSpace())
+                Role = role;
+        }
+
+        public RelationMemberInfo(RelationMember member)
+        {
+            Type = member.Type;
+            Id = member.Id;
+
+            if (!member.Role.IsNullOrWhiteSpace())
+                Role = member.Role;
+        }
+
+        public static Func<RelationMemberInfo, string> StringFormatter =
+            member => member.Role + " - " + member.Type.ToString()[0] + member.Id.ToString();
+
+        public override string ToString() => StringFormatter(this);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
@@ -7,26 +8,21 @@ using System.Linq;
 
 namespace OsmDataKit
 {
-    [JsonObject]
+    [JsonConverter(typeof(WayObjectConverter))]
     public class WayObject : GeoObject
     {
         public override OsmGeoType Type => OsmGeoType.Way;
 
-        [JsonIgnore]
-        public IReadOnlyList<NodeObject> Nodes { get; set; }
+        public IReadOnlyList<NodeObject> Nodes { get; private set; }
 
-        [JsonProperty("n")]
-        public IReadOnlyList<long> MissedNodeIds { get; set; }
+        public IReadOnlyList<long> MissedNodeIds { get; private set; }
 
-        public WayObject() { }
+        public bool IsCompleted => MissedNodeIds == null;
 
         public WayObject(
             long id, IReadOnlyList<NodeObject> nodes, Dictionary<string, string> tags = null)
             : base(id, tags)
         {
-            Debug.Assert(nodes != null);
-            Debug.Assert(nodes?.Count > 0);
-
             if (nodes == null)
                 throw new ArgumentNullException(nameof(nodes));
 
@@ -36,28 +32,28 @@ namespace OsmDataKit
             Nodes = nodes;
         }
 
-        internal WayObject(Way way) : base(way)
+        public WayObject(
+            long id, IReadOnlyList<long> nodeIds, Dictionary<string, string> tags = null)
+            : base(id, tags)
         {
-            MissedNodeIds = way.Nodes;
+            if (nodeIds == null)
+                throw new ArgumentNullException(nameof(nodeIds));
+
+            if (nodeIds.Count == 0)
+                throw new ArgumentException(nameof(nodeIds));
+
+            MissedNodeIds = nodeIds;
         }
 
-        [JsonIgnore]
-        public bool IsCompleted => MissedNodeIds == null || MissedNodeIds.Count == 0;
-
-        internal void ReplaceNodes(IReadOnlyList<NodeObject> nodes)
+        public WayObject(Way way) : base(way)
         {
-            Debug.Assert(Nodes == null);
-            Debug.Assert(nodes?.Count > 0);
-
-            Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
-            MissedNodeIds = null;
+            MissedNodeIds = way.Nodes;
         }
 
         internal void FillNodes(IReadOnlyList<NodeObject> nodes)
         {
             Debug.Assert(Nodes == null);
-            Debug.Assert(nodes != null);
-            Debug.Assert(nodes?.Count > 0);
+            Debug.Assert(nodes.Count > 0);
 
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
 
