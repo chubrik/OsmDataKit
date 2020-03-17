@@ -5,24 +5,24 @@ namespace OsmDataKit
 {
     public static class RelationObjectExtensions
     {
-        public static IEnumerable<NodeObject> DeepNodes(this RelationObject relation) =>
+        public static IEnumerable<NodeObject> AllChildNodes(this RelationObject relation) =>
             relation.Members.Nodes().Concat(relation.Members.Ways().SelectMany(i => i.Nodes))
-                                    .Concat(relation.Members.Relations().SelectMany(DeepNodes))
+                                    .Concat(relation.Members.Relations().SelectMany(AllChildNodes))
                                     .Distinct();
 
-        public static IEnumerable<WayObject> DeepWays(this RelationObject relation) =>
-            relation.Members.Ways().Concat(relation.Members.Relations().SelectMany(DeepWays))
+        public static IEnumerable<WayObject> AllChildWays(this RelationObject relation) =>
+            relation.Members.Ways().Concat(relation.Members.Relations().SelectMany(AllChildWays))
                                    .Distinct();
 
-        public static IEnumerable<RelationObject> DeepRelations(this RelationObject relation)
+        public static IEnumerable<RelationObject> AllChildRelations(this RelationObject relation)
         {
             var memberRelations = relation.Members.Relations().ToList();
 
-            return memberRelations.Concat(memberRelations.SelectMany(DeepRelations))
+            return memberRelations.Concat(memberRelations.SelectMany(AllChildRelations))
                                   .Distinct();
         }
 
-        public static bool IsCompleted(this RelationObject relation) =>
-            relation.MissedMembers == null && relation.Members.All(i => i.Geo.IsCompleted());
+        public static bool IsComplete(this RelationObject relation) =>
+            relation.MissedMembers == null && relation.Members.All(i => i.Geo.IsComplete());
     }
 }

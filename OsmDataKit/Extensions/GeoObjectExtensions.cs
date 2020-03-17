@@ -10,16 +10,16 @@ namespace OsmDataKit
             {
                 NodeObject node => node.Location,
                 WayObject way => way.Nodes.Select(i => i.Location).CenterLocation(),
-                RelationObject relation => relation.DeepNodes().Select(i => i.Location).CenterLocation(),
+                RelationObject relation => relation.AllChildNodes().Select(i => i.Location).CenterLocation(),
                 _ => throw new InvalidOperationException(),
             };
 
-        public static bool IsCompleted(this GeoObject geo) =>
+        public static bool IsComplete(this GeoObject geo) =>
             geo switch
             {
                 NodeObject _ => true,
-                WayObject way => way.IsCompleted,
-                RelationObject relation => relation.IsCompleted(),
+                WayObject way => way.IsComplete,
+                RelationObject relation => relation.IsComplete(),
                 _ => throw new InvalidOperationException(),
             };
     }

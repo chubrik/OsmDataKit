@@ -17,7 +17,7 @@ namespace OsmDataKit
 
         public IReadOnlyList<long> MissedNodeIds { get; private set; }
 
-        public bool IsCompleted => MissedNodeIds == null;
+        public bool IsComplete => MissedNodeIds == null;
 
         public WayObject(
             long id, IReadOnlyList<NodeObject> nodes, Dictionary<string, string> tags = null)

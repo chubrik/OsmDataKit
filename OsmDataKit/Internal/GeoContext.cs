@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OsmDataKit
+namespace OsmDataKit.Internal
 {
     [JsonObject]
-    public sealed class OsmResponse
+    public sealed class GeoContext
     {
         [JsonIgnore]
         public Dictionary<long, NodeObject> Nodes { get; set; } = new Dictionary<long, NodeObject>(0);

@@ -13,13 +13,13 @@ namespace OsmDataKit.Tests
         public void LoadByFilter()
         {
             TestInitialize(nameof(LoadByFilter));
-            var response = OsmService.Load(SrcPath, i => i.Tags.ContainsKey("place"));
-            Assert.IsTrue(response.Nodes.Count > 100);
-            Assert.IsTrue(response.Ways.Count > 5000);
-            Assert.IsTrue(response.Relations.Count > 1000);
-            Assert.IsTrue(response.MissedNodeIds.Count == 0);
-            Assert.IsTrue(response.MissedWayIds.Count == 0);
-            Assert.IsTrue(response.MissedRelationIds.Count == 0);
+            var geos = OsmService.LoadObjects(SrcPath, i => i.Tags.ContainsKey("place"));
+            Assert.IsTrue(geos.Nodes.Count > 100);
+            Assert.IsTrue(geos.Ways.Count > 5000);
+            Assert.IsTrue(geos.Relations.Count > 1000);
+            Assert.IsTrue(geos.MissedNodeIds.Count == 0);
+            Assert.IsTrue(geos.MissedWayIds.Count == 0);
+            Assert.IsTrue(geos.MissedRelationIds.Count == 0);
         }
 
         [TestMethod]
@@ -31,24 +31,24 @@ namespace OsmDataKit.Tests
             var title = "Vega Island";
             long relationId = 2969204;
 
-            var request = new OsmRequest { RelationIds = new[] { relationId } };
-            var response = OsmService.LoadObjects(SrcPath, cacheName: title, request);
+            var request = new GeoRequest { RelationIds = new[] { relationId } };
+            var completeGeos = OsmService.LoadCompleteObjects(SrcPath, cacheName: title, request);
 
-            Assert.IsTrue(response.RootNodes.Count == 0);
-            Assert.IsTrue(response.RootWays.Count == 0);
-            Assert.IsTrue(response.RootRelations.Count == 1);
-            Assert.IsTrue(response.MissedNodeIds.Count == 0);
-            Assert.IsTrue(response.MissedWayIds.Count == 0);
-            Assert.IsTrue(response.MissedRelationIds.Count == 0);
+            Assert.IsTrue(completeGeos.RootNodes.Count == 0);
+            Assert.IsTrue(completeGeos.RootWays.Count == 0);
+            Assert.IsTrue(completeGeos.RootRelations.Count == 1);
+            Assert.IsTrue(completeGeos.MissedNodeIds.Count == 0);
+            Assert.IsTrue(completeGeos.MissedWayIds.Count == 0);
+            Assert.IsTrue(completeGeos.MissedRelationIds.Count == 0);
 
-            var relation = response.RootRelations.Single();
+            var relation = completeGeos.RootRelations.Single();
 
             Assert.IsTrue(relation.Type == OsmGeoType.Relation);
             Assert.IsTrue(relation.Id == relationId);
             Assert.IsTrue(relation.Tags["type"] == "multipolygon");
             Assert.IsTrue(relation.Tags["place"] == "island");
             Assert.IsTrue(relation.Members.Count > 100);
-            Assert.IsTrue(relation.IsCompleted());
+            Assert.IsTrue(relation.IsComplete());
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace OsmDataKit
 {
-    public sealed class OsmObjectResponse
+    public sealed class CompleteGeoObjects
     {
         public IReadOnlyList<NodeObject> RootNodes { get; internal set; }
         public IReadOnlyList<WayObject> RootWays { get; internal set; }

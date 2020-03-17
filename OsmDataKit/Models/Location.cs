@@ -37,7 +37,7 @@ namespace OsmDataKit
 
         public static bool operator ==(Location left, Location right) => left.Equals(right);
 
-        public static bool operator !=(Location left, Location right) => left.Equals(right);
+        public static bool operator !=(Location left, Location right) => !left.Equals(right);
 
         #endregion
     }

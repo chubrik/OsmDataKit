@@ -2,7 +2,7 @@
 
 namespace OsmDataKit
 {
-    public sealed class OsmRequest
+    public sealed class GeoRequest
     {
         public IEnumerable<long> NodeIds { get; set; }
         public IEnumerable<long> WayIds { get; set; }
