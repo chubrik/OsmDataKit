@@ -5,13 +5,19 @@ using OsmSharp.Streams;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace OsmDataKit
 {
     public static class OsmService
     {
-        private const string CacheDir = "$osm-cache";
+        private static readonly string BaseDirectory =
+            Environment.GetEnvironmentVariable("VisualStudioDir") != null
+                ? PathHelper.Combine(Environment.CurrentDirectory, "../../..")
+                : Environment.CurrentDirectory;
+
+        public static string CacheDir { get; set; } = BaseDirectory + "/$work/$osm-cache";
 
         #region Validate
 
@@ -27,7 +33,7 @@ namespace OsmDataKit
             long totalCount = 0;
             long noIdCount = 0;
 
-            using (var fileStream = FileClient.OpenRead(pbfPath))
+            using (var fileStream = File.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
@@ -88,7 +94,7 @@ namespace OsmDataKit
             var foundRelations = new Dictionary<long, RelationObject>();
             var allRelations = loadAllRelations ? new Dictionary<long, RelationObject>() : null;
 
-            using (var fileStream = FileClient.OpenRead(pbfPath))
+            using (var fileStream = File.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
 
@@ -164,7 +170,7 @@ namespace OsmDataKit
             List<long> missedRelationIds = null;
             string logMessage;
 
-            using (var fileStream = FileClient.OpenRead(pbfPath))
+            using (var fileStream = File.OpenRead(pbfPath))
             {
                 var source = new PBFOsmStreamSource(fileStream);
                 var thisType = requestNodeIds.Count > 0 ? OsmGeoType.Node : requestWayIds.Count > 0 ? OsmGeoType.Way : OsmGeoType.Relation;
@@ -337,21 +343,21 @@ namespace OsmDataKit
             var cacheFullPath = CacheFullPath(cacheName);
             GeoContext context;
 
-            if (FileClient.Exists(cacheFullPath))
+            if (File.Exists(cacheFullPath))
             {
-                context = JsonFileClient.Read<GeoContext>(cacheFullPath);
+                context = JsonFile.Read<GeoContext>(cacheFullPath);
                 return CompleteObjects(context);
             }
 
-            if (!FileClient.Exists(pbfPath))
+            if (!File.Exists(pbfPath))
                 throw new InvalidOperationException();
 
             LogService.BeginInfo("Load OSM complete objects" + (loadAllRelations ? string.Empty : " (low memory mode)"));
             var cacheStepPath = CacheStepPath(cacheName, 1);
             var doneSteps = 1;
 
-            if (FileClient.Exists(cacheStepPath))
-                context = JsonFileClient.Read<GeoContext>(cacheStepPath);
+            if (File.Exists(cacheStepPath))
+                context = JsonFile.Read<GeoContext>(cacheStepPath);
             else
             {
                 LogService.LogInfo($"Step 1");
@@ -367,7 +373,7 @@ namespace OsmDataKit
                 if (loadAllRelations)
                     FilterAllRelations(context);
 
-                JsonFileClient.Write(cacheStepPath, context);
+                JsonFile.Write(cacheStepPath, context);
             }
 
             if (stepLimit != 1)
@@ -395,13 +401,13 @@ namespace OsmDataKit
                     $"{context.MissedWayIds.Count} ways, " +
                     $"{context.MissedRelationIds.Count} relations");
 
-            JsonFileClient.Write(cacheFullPath, context);
+            JsonFile.Write(cacheFullPath, context);
 
-            if (!FileClient.Exists(cacheFullPath))
+            if (!File.Exists(cacheFullPath))
                 throw new InvalidOperationException();
 
             for (var i = 1; i <= doneSteps; i++)
-                FileClient.Delete(CacheStepPath(cacheName, i));
+                File.Delete(CacheStepPath(cacheName, i));
 
             var completeGeos = CompleteObjects(context);
             LogService.EndInfo("Load OSM complete objects completed");
@@ -453,8 +459,8 @@ namespace OsmDataKit
             var cacheStepPath = CacheStepPath(cacheName, step);
             GeoContext newContext;
 
-            if (FileClient.Exists(cacheStepPath))
-                newContext = JsonFileClient.Read<GeoContext>(cacheStepPath);
+            if (File.Exists(cacheStepPath))
+                newContext = JsonFile.Read<GeoContext>(cacheStepPath);
             else
             {
                 LogService.Begin("Calculate next request");
@@ -492,7 +498,7 @@ namespace OsmDataKit
                 LogService.LogInfo($"Step {step}");
                 var newRequest = new GeoRequest { NodeIds = needNodeIds, WayIds = needWayIds, RelationIds = needRelIds };
                 newContext = Load(pbfPath, newRequest, loadAllRelations: false);
-                JsonFileClient.Write(cacheStepPath, newContext);
+                JsonFile.Write(cacheStepPath, newContext);
             }
 
             LogService.Begin("Merge data");

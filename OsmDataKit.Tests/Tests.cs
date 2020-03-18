@@ -7,13 +7,11 @@ namespace OsmDataKit.Tests
     [TestClass]
     public class Tests : TestsBase
     {
-        private const string SrcPath = "../$data/antarctica.osm.pbf";
-
         [TestMethod]
         public void LoadByFilter()
         {
             TestInitialize(nameof(LoadByFilter));
-            var geos = OsmService.LoadObjects(SrcPath, i => i.Tags.ContainsKey("place"));
+            var geos = OsmService.LoadObjects(PbfPath, i => i.Tags.ContainsKey("place"));
             Assert.IsTrue(geos.Nodes.Count > 100);
             Assert.IsTrue(geos.Ways.Count > 5000);
             Assert.IsTrue(geos.Relations.Count > 1000);
@@ -32,7 +30,7 @@ namespace OsmDataKit.Tests
             long relationId = 2969204;
 
             var request = new GeoRequest { RelationIds = new[] { relationId } };
-            var completeGeos = OsmService.LoadCompleteObjects(SrcPath, cacheName: title, request);
+            var completeGeos = OsmService.LoadCompleteObjects(PbfPath, cacheName: title, request);
 
             Assert.IsTrue(completeGeos.RootNodes.Count == 0);
             Assert.IsTrue(completeGeos.RootWays.Count == 0);

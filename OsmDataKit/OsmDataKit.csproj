@@ -18,7 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kit.Json" Version="1.6.3" />
+    <PackageReference Include="Kit.Core" Version="1.6.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="OsmSharp" Version="6.2.0" />
   </ItemGroup>
 

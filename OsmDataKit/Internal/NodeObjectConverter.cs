@@ -6,7 +6,7 @@ namespace OsmDataKit.Internal
 {
     internal class NodeObjectConverter : GeoObjectConverter<NodeObject>
     {
-        private const string LocationPropName = "p";
+        private const string LocationPropName = "l";
 
         public override NodeObject ReadJson(JsonReader reader, Type objectType, NodeObject existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
