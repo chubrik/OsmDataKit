@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>$(NetStandardTargetFramework)</TargetFramework>
     <Version>2.2.1</Version>
     <PackageTags>osm openstreetmap data pbf</PackageTags>
     <Authors>Arkadi Chubrik</Authors>
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kit.Core" Version="1.6.3" />
+    <PackageReference Include="Kit.Core" Version="1.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="OsmSharp" Version="6.2.0" />
   </ItemGroup>

@@ -9,11 +9,10 @@ namespace OsmDataKit.Tests
     {
         private static readonly string BaseDirectory =
             Environment.GetEnvironmentVariable("VisualStudioDir") != null
-                ? PathHelper.Combine(Environment.CurrentDirectory, "../../..")
+                ? Path.GetFullPath(Environment.CurrentDirectory + "/../../..")
                 : Environment.CurrentDirectory;
 
-        protected static readonly string PbfPath =
-            PathHelper.Combine(BaseDirectory, "App_Data/antarctica.osm.pbf");
+        protected static readonly string PbfPath = BaseDirectory + "/App_Data/antarctica.osm.pbf";
 
         [TestInitialize]
         public void BaseInitialize()
@@ -28,7 +27,7 @@ namespace OsmDataKit.Tests
             Kit.Kit.Setup(workingDirectory: workingDir);
 
             var nativeWorkingDir = BaseDirectory + "/" + workingDir;
-            OsmService.CacheDir = nativeWorkingDir + "/$osm-cache";
+            OsmService.CacheDirectory = nativeWorkingDir + "/$osm-cache";
 
             if (Directory.Exists(nativeWorkingDir))
             {

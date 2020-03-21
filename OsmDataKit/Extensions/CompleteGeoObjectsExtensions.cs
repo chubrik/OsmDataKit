@@ -5,6 +5,11 @@ namespace OsmDataKit
 {
     public static class CompleteGeoObjectsExtensions
     {
+        public static IEnumerable<GeoObject> RootObjects(this CompleteGeoObjects completeGeos) =>
+            (completeGeos.RootNodes as IEnumerable<GeoObject>)
+                .Concat(completeGeos.RootWays)
+                .Concat(completeGeos.RootRelations);
+
         public static IEnumerable<NodeObject> AllNodes(this CompleteGeoObjects completeGeos) =>
             completeGeos.RootNodes
                         .Concat(completeGeos.AllWays().SelectMany(i => i.Nodes))
@@ -20,5 +25,10 @@ namespace OsmDataKit
             completeGeos.RootRelations
                         .Concat(completeGeos.RootRelations.SelectMany(i => i.AllChildRelations()))
                         .Distinct();
+
+        public static IEnumerable<GeoObject> AllObjects(this CompleteGeoObjects completeGeos) =>
+            (completeGeos.AllNodes() as IEnumerable<GeoObject>)
+                .Concat(completeGeos.AllWays())
+                .Concat(completeGeos.AllRelations());
     }
 }

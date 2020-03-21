@@ -5,7 +5,7 @@ using System.Linq;
 namespace OsmDataKit.Internal
 {
     [JsonObject]
-    public sealed class GeoContext
+    internal sealed class GeoContext
     {
         [JsonIgnore]
         public Dictionary<long, NodeObject> Nodes { get; set; } = new Dictionary<long, NodeObject>(0);
