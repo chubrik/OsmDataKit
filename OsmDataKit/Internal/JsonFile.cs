@@ -5,10 +5,17 @@ using System.IO;
 
 namespace OsmDataKit.Internal
 {
-    internal class JsonFile
+    internal static class CacheProvider
     {
-        public static T Read<T>(string path) where T : class =>
-            LogService.Log($"Read json file \"{FileClient.LogPath(path)}\"", () =>
+        public static bool Has(string cacheName) => File.Exists(CachePath(cacheName));
+
+        public static void Delete(string cacheName) => File.Delete(CachePath(cacheName));
+
+        public static GeoContext Get(string cacheName)
+        {
+            var path = CachePath(cacheName);
+
+            return LogService.Log($"Read cache file \"{FileClient.LogPath(path)}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -17,22 +24,27 @@ namespace OsmDataKit.Internal
                 using var streamReader = new StreamReader(fileStream);
                 using var jsonTextReader = new JsonTextReader(streamReader);
 
-                var obj = new JsonSerializer().Deserialize<T>(jsonTextReader);
+                var context = new JsonSerializer().Deserialize<GeoContext>(jsonTextReader);
 
-                if (obj.Equals(null))
-                    throw new InvalidOperationException($"Wrong json content \"{FileClient.LogPath(path)}\"");
+                if (context.Equals(null))
+                    throw new InvalidOperationException(
+                        $"Wrong cache content \"{FileClient.LogPath(path)}\"");
 
-                return obj;
+                return context;
             });
+        }
 
-        public static void Write<T>(string path, T obj) where T : class =>
-            LogService.Log($"Write json file \"{FileClient.LogPath(path)}\"", () =>
+        public static void Put(string cacheName, GeoContext context)
+        {
+            var path = CachePath(cacheName);
+
+            LogService.Log($"Write cache file \"{FileClient.LogPath(path)}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
 
-                if (obj == null)
-                    throw new ArgumentNullException(nameof(obj));
+                if (context == null)
+                    throw new ArgumentNullException(nameof(context));
 
                 var dirPath = Path.GetFullPath(path + @"\..");
 
@@ -44,7 +56,7 @@ namespace OsmDataKit.Internal
 
                 if (File.Exists(path))
                 {
-                    Log.Debug("Delete previous file");
+                    Log.Debug("Delete previous cache file");
                     File.Delete(path);
                 }
 
@@ -52,8 +64,12 @@ namespace OsmDataKit.Internal
                 using var streamWriter = new StreamWriter(fileStream);
                 using var jsonTextWriter = new JsonTextWriter(streamWriter);
 
-                new JsonSerializer().Serialize(jsonTextWriter, obj);
+                new JsonSerializer().Serialize(jsonTextWriter, context);
                 jsonTextWriter.Close();
             });
+        }
+
+        private static string CachePath(string cacheName) =>
+            @$"{OsmService.CacheDirectory}\{cacheName}.json";
     }
 }

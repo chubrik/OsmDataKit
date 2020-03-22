@@ -11,7 +11,7 @@ namespace OsmDataKit.Tests
         public void LoadByFilter()
         {
             TestInitialize(nameof(LoadByFilter));
-            var geos = OsmService.LoadObjects(PbfPath, i => i.Tags.ContainsKey("place"));
+            var geos = OsmService.LoadObjects(PbfPath, "Places", i => i.Tags.ContainsKey("place"));
             Assert.IsTrue(geos.Nodes.Count > 100);
             Assert.IsTrue(geos.Ways.Count > 5000);
             Assert.IsTrue(geos.Relations.Count > 1000);

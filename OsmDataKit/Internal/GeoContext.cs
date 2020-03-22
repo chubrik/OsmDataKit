@@ -40,7 +40,5 @@ namespace OsmDataKit.Internal
             get => Relations.Values.ToArray();
             set => Relations = value.ToDictionary(i => i.Id);
         }
-
-        internal Dictionary<long, RelationObject> AllRelations { get; set; }
     }
 }
