@@ -8,7 +8,7 @@ namespace OsmDataKit.Internal
     internal class JsonFile
     {
         public static T Read<T>(string path) where T : class =>
-            Log.Debug($"Read json file \"{FileClient.LogPath(path)}\"", () =>
+            LogService.Log($"Read json file \"{FileClient.LogPath(path)}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -20,13 +20,13 @@ namespace OsmDataKit.Internal
                 var obj = new JsonSerializer().Deserialize<T>(jsonTextReader);
 
                 if (obj.Equals(null))
-                    throw new InvalidOperationException($"Wrong json content \"{path}\"");
+                    throw new InvalidOperationException($"Wrong json content \"{FileClient.LogPath(path)}\"");
 
                 return obj;
             });
 
         public static void Write<T>(string path, T obj) where T : class =>
-            Log.Debug($"Write json file \"{FileClient.LogPath(path)}\"", () =>
+            LogService.Log($"Write json file \"{FileClient.LogPath(path)}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
