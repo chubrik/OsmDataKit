@@ -1,33 +1,27 @@
-﻿using Kit;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
 namespace OsmDataKit.Tests
 {
     public abstract class TestsBase
     {
-        private static readonly string BaseDirectory =
-            Environment.GetEnvironmentVariable("VisualStudioDir") != null
-                ? Path.GetFullPath(Environment.CurrentDirectory + "/../../..")
-                : Environment.CurrentDirectory;
+        private static readonly string BaseDirectory = Kit.Kit.BaseDirectory;
 
-        protected static readonly string PbfPath = BaseDirectory + "/App_Data/antarctica.osm.pbf";
+        protected static readonly string PbfPath = BaseDirectory + @"\App_Data\antarctica.osm.pbf";
 
         [TestInitialize]
         public void BaseInitialize()
         {
             Kit.Kit.Setup(test: true, baseDirectory: BaseDirectory);
-            ConsoleClient.Setup(minLevel: LogLevel.Log);
         }
 
         public static void TestInitialize(string testName)
         {
-            var workingDir = "$work/" + testName;
+            var workingDir = @"$work\" + testName;
             Kit.Kit.Setup(workingDirectory: workingDir);
 
-            var nativeWorkingDir = BaseDirectory + "/" + workingDir;
-            OsmService.CacheDirectory = nativeWorkingDir + "/$osm-cache";
+            var nativeWorkingDir = BaseDirectory + @"\" + workingDir;
+            OsmService.CacheDirectory = nativeWorkingDir + @"\$osm-cache";
 
             if (Directory.Exists(nativeWorkingDir))
             {

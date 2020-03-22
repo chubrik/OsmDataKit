@@ -31,16 +31,16 @@ namespace OsmDataKit
         }
 
         public RelationObject(
-            long id, IReadOnlyList<RelationMemberInfo> members, Dictionary<string, string> tags = null)
+            long id, IReadOnlyList<RelationMemberInfo> memberInfos, Dictionary<string, string> tags = null)
             : base(id, tags)
         {
-            if (members == null)
-                throw new ArgumentNullException(nameof(members));
+            if (memberInfos == null)
+                throw new ArgumentNullException(nameof(memberInfos));
 
-            if (members.Count == 0)
-                throw new ArgumentException(nameof(members));
+            if (memberInfos.Count == 0)
+                throw new ArgumentException(nameof(memberInfos));
 
-            MissedMembers = members;
+            MissedMembers = memberInfos;
         }
 
         public RelationObject(Relation relation) : base(relation)

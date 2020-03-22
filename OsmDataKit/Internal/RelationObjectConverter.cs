@@ -20,14 +20,14 @@ namespace OsmDataKit.Internal
 
             long relationId = 0;
             Dictionary<string, string> tags = null;
-            var members = new List<RelationMemberInfo>();
+            var memberInfos = new List<RelationMemberInfo>();
 
             for (; ; )
             {
                 reader.Read();
 
                 if (reader.TokenType == JsonToken.EndObject)
-                    return new RelationObject(relationId, members, tags);
+                    return new RelationObject(relationId, memberInfos, tags);
 
                 if (reader.TokenType != JsonToken.PropertyName)
                     throw new InvalidOperationException();
@@ -69,7 +69,7 @@ namespace OsmDataKit.Internal
 
                                 if (reader.TokenType == JsonToken.EndObject)
                                 {
-                                    members.Add(new RelationMemberInfo(memberType.Value, memberId, memberRole));
+                                    memberInfos.Add(new RelationMemberInfo(memberType.Value, memberId, memberRole));
                                     break;
                                 }
 
