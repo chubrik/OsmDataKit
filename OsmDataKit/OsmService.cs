@@ -545,7 +545,7 @@ namespace OsmDataKit
                         return false;
                     }
 
-                    var newRequest = new GeoRequest { NodeIds = needNodeIds, WayIds = needWayIds, RelationIds = needRelIds };
+                    var newRequest = new GeoRequest(needNodeIds, needWayIds, needRelIds);
                     newContext = Load(pbfPath, cacheStepName, newRequest, loadAllRelations: false);
                 }
 
