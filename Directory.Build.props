@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <NetCoreAppTargetFramework>netcoreapp3.1</NetCoreAppTargetFramework>
     <NetStandardTargetFramework>netstandard2.1</NetStandardTargetFramework>
   </PropertyGroup>

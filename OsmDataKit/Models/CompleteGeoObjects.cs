@@ -11,6 +11,20 @@ namespace OsmDataKit
         public IReadOnlyList<long> MissedWayIds { get; internal set; }
         public IReadOnlyList<long> MissedRelationIds { get; internal set; }
 
-        internal CompleteGeoObjects() { }
+        internal CompleteGeoObjects(
+            IReadOnlyList<NodeObject> rootNodes,
+            IReadOnlyList<WayObject> rootWays,
+            IReadOnlyList<RelationObject> rootRelations,
+            IReadOnlyList<long> missedNodeIds,
+            IReadOnlyList<long> missedWayIds,
+            IReadOnlyList<long> missedRelationIds)
+        {
+            RootNodes = rootNodes;
+            RootWays = rootWays;
+            RootRelations = rootRelations;
+            MissedNodeIds = missedNodeIds;
+            MissedWayIds = missedWayIds;
+            MissedRelationIds = missedRelationIds;
+        }
     }
 }

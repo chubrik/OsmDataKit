@@ -8,6 +8,13 @@ namespace OsmDataKit.Tests
     public class Tests : TestsBase
     {
         [TestMethod]
+        public void ValidatePbf()
+        {
+            TestInitialize(nameof(ValidatePbf));
+            OsmService.ValidateSource(PbfPath);
+        }
+
+        [TestMethod]
         public void LoadByFilter()
         {
             TestInitialize(nameof(LoadByFilter));
@@ -43,9 +50,9 @@ namespace OsmDataKit.Tests
 
             Assert.IsTrue(relation.Type == OsmGeoType.Relation);
             Assert.IsTrue(relation.Id == relationId);
-            Assert.IsTrue(relation.Tags["type"] == "multipolygon");
-            Assert.IsTrue(relation.Tags["place"] == "island");
-            Assert.IsTrue(relation.Members.Count > 100);
+            Assert.IsTrue(relation.Tags!["type"] == "multipolygon");
+            Assert.IsTrue(relation.Tags!["place"] == "island");
+            Assert.IsTrue(relation.Members!.Count > 100);
             Assert.IsTrue(relation.IsComplete());
         }
     }

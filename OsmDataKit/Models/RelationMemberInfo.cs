@@ -10,11 +10,11 @@ namespace OsmDataKit
 
         public long Id { get; }
 
-        public string Role { get; }
+        public string? Role { get; }
 
         public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
 
-        public RelationMemberInfo(OsmGeoType type, long id, string role)
+        public RelationMemberInfo(OsmGeoType type, long id, string? role)
         {
             if (id <= 0)
                 throw new ArgumentOutOfRangeException(nameof(id));

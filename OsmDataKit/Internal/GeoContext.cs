@@ -21,21 +21,21 @@ namespace OsmDataKit.Internal
         public List<long> MissedRelationIds { get; set; } = new List<long>(0);
 
         [JsonProperty("Nodes")]
-        public NodeObject[] _nodes
+        public NodeObject[] JsonNodes
         {
             get => Nodes.Values.ToArray();
             set => Nodes = value.ToDictionary(i => i.Id);
         }
 
         [JsonProperty("Ways")]
-        public WayObject[] _ways
+        public WayObject[] JsonWays
         {
             get => Ways.Values.ToArray();
             set => Ways = value.ToDictionary(i => i.Id);
         }
 
         [JsonProperty("Relations")]
-        public RelationObject[] _relations
+        public RelationObject[] JsonRelations
         {
             get => Relations.Values.ToArray();
             set => Relations = value.ToDictionary(i => i.Id);

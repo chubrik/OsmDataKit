@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>$(NetStandardTargetFramework)</TargetFramework>
-    <Version>3.0.2</Version>
+    <Version>3.0.3</Version>
     <PackageTags>osm openstreetmap data pbf</PackageTags>
     <Authors>Arkadi Chubrik</Authors>
-    <Description>Complete OSM objects. It makes many requests to PBF, then it collects all the data and caches them.</Description>
+    <Description>Completed nested geo objects from OSM-PBF. Saving RAM and caching the results.</Description>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/chubrik/OsmDataKit</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -18,8 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kit.Core" Version="1.7.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Kit" Version="1.9.3" />
     <PackageReference Include="OsmSharp" Version="6.2.0" />
   </ItemGroup>
 

@@ -5,22 +5,20 @@ namespace OsmDataKit.Tests
 {
     public abstract class TestsBase
     {
-        private static readonly string BaseDirectory = Kit.Kit.BaseDirectory;
-
-        protected static readonly string PbfPath = BaseDirectory + @"\App_Data\antarctica.osm.pbf";
+        protected static readonly string PbfPath = Kit.Kit.BaseDirectory + @"\App_Data\antarctica.osm.pbf";
 
         [TestInitialize]
         public void BaseInitialize()
         {
-            Kit.Kit.Setup(test: true, baseDirectory: BaseDirectory);
+            Kit.Kit.Setup(isTest: true, useFileDiagnostics: true);
         }
 
         public static void TestInitialize(string testName)
         {
             var workingDir = @"$work\" + testName;
-            Kit.Kit.Setup(workingDirectory: workingDir);
+            Kit.Kit.Setup(workingDirectory: workingDir, diagnosticsDirectory: "$diagnostics");
 
-            var nativeWorkingDir = BaseDirectory + @"\" + workingDir;
+            var nativeWorkingDir = Kit.Kit.BaseDirectory + @"\" + workingDir;
             OsmService.CacheDirectory = nativeWorkingDir + @"\$osm-cache";
 
             if (Directory.Exists(nativeWorkingDir))

@@ -6,15 +6,15 @@ namespace OsmDataKit.Internal
 {
     internal class WayObjectConverter : GeoObjectConverter<WayObject>
     {
-        private const string NodeIdsPropName = "n";
+        private const string _nodeIdsPropName = "n";
 
-        public override WayObject ReadJson(JsonReader reader, Type objectType, WayObject existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override WayObject ReadJson(JsonReader reader, Type objectType, WayObject? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader.TokenType != JsonToken.StartObject)
                 throw new InvalidOperationException();
 
             long id = 0;
-            Dictionary<string, string> tags = null;
+            Dictionary<string, string>? tags = null;
             var nodeIds = new List<long>();
 
             for (; ; )
@@ -38,7 +38,7 @@ namespace OsmDataKit.Internal
                         tags = ReadTagsJson(reader);
                         break;
 
-                    case NodeIdsPropName:
+                    case _nodeIdsPropName:
                         reader.Read();
 
                         if (reader.TokenType != JsonToken.StartArray)
@@ -57,16 +57,16 @@ namespace OsmDataKit.Internal
             }
         }
 
-        public override void WriteJson(JsonWriter writer, WayObject value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, WayObject? value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
             writer.WritePropertyName(IdPropName);
-            writer.WriteValue(value.Id);
+            writer.WriteValue(value!.Id);
             WriteTagsJson(writer, value);
-            writer.WritePropertyName(NodeIdsPropName);
+            writer.WritePropertyName(_nodeIdsPropName);
             writer.WriteStartArray();
 
-            foreach (var nodeId in value.MissedNodeIds)
+            foreach (var nodeId in value.MissedNodeIds!)
                 writer.WriteValue(nodeId);
 
             writer.WriteEndArray();

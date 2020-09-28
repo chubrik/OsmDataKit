@@ -12,11 +12,11 @@ namespace OsmDataKit
 
         public long Id { get; }
 
-        public Dictionary<string, string> Tags { get; set; }
+        public Dictionary<string, string>? Tags { get; set; }
 
         public string Url => $"https://www.openstreetmap.org/{Type.ToString().ToLower()}/{Id}";
 
-        protected GeoObject(long id, Dictionary<string, string> tags)
+        protected GeoObject(long id, Dictionary<string, string>? tags)
         {
             if (id <= 0)
                 throw new ArgumentOutOfRangeException(nameof(id));
@@ -27,7 +27,7 @@ namespace OsmDataKit
 
         protected GeoObject(OsmGeo osmGeo)
         {
-            Id = osmGeo.Id.Value;
+            Id = osmGeo.Id!.Value;
 
             if (osmGeo.Tags.Count > 0)
                 Tags = osmGeo.Tags.ToDictionary(i => i.Key, i => i.Value);

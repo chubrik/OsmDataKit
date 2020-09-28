@@ -17,21 +17,21 @@ namespace OsmDataKit
         public float Longitude => Location.Longitude;
 
         public NodeObject(
-            long id, double latitude, double longitude, Dictionary<string, string> tags = null)
+            long id, double latitude, double longitude, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             Location = new Location(latitude, longitude);
         }
 
         public NodeObject(
-            long id, float latitude, float longitude, Dictionary<string, string> tags = null)
+            long id, float latitude, float longitude, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             Location = new Location(latitude, longitude);
         }
 
         public NodeObject(
-            long id, Location location, Dictionary<string, string> tags = null)
+            long id, Location location, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             Location = location;
@@ -39,7 +39,7 @@ namespace OsmDataKit
 
         public NodeObject(Node node) : base(node)
         {
-            Location = new Location(node.Latitude.Value, node.Longitude.Value);
+            Location = new Location(node.Latitude!.Value, node.Longitude!.Value);
         }
     }
 }

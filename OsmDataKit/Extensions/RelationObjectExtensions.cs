@@ -1,22 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace OsmDataKit
 {
     public static class RelationObjectExtensions
     {
-        public static IEnumerable<NodeObject> AllChildNodes(this RelationObject relation) =>
-            relation.Members.Nodes().Concat(relation.Members.Ways().SelectMany(i => i.Nodes))
-                                    .Concat(relation.Members.Relations().SelectMany(AllChildNodes))
-                                    .Distinct();
+        public static IEnumerable<NodeObject> AllChildNodes(this RelationObject relation)
+        {
+            var members = relation.Members ?? throw new InvalidOperationException();
 
-        public static IEnumerable<WayObject> AllChildWays(this RelationObject relation) =>
-            relation.Members.Ways().Concat(relation.Members.Relations().SelectMany(AllChildWays))
-                                   .Distinct();
+            return members.Nodes().Concat(members.Ways().SelectMany(i => i.Nodes))
+                                  .Concat(members.Relations().SelectMany(AllChildNodes))
+                                  .Distinct();
+        }
+
+        public static IEnumerable<WayObject> AllChildWays(this RelationObject relation)
+        {
+            var members = relation.Members ?? throw new InvalidOperationException();
+
+            return members.Ways().Concat(members.Relations().SelectMany(AllChildWays))
+                                 .Distinct();
+        }
 
         public static IEnumerable<RelationObject> AllChildRelations(this RelationObject relation)
         {
-            var memberRelations = relation.Members.Relations().ToList();
+            var memberRelations =
+                relation.Members?.Relations().ToList() ?? throw new InvalidOperationException();
 
             return memberRelations.Concat(memberRelations.SelectMany(AllChildRelations))
                                   .Distinct();

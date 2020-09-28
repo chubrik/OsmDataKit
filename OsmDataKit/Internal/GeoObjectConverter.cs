@@ -11,7 +11,7 @@ namespace OsmDataKit.Internal
         protected const string TagsPropName = "g";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected Dictionary<string, string> ReadTagsJson(JsonReader reader)
+        protected Dictionary<string, string>? ReadTagsJson(JsonReader reader)
         {
             reader.Read();
 
@@ -30,7 +30,7 @@ namespace OsmDataKit.Internal
                 if (reader.TokenType != JsonToken.PropertyName)
                     throw new InvalidOperationException();
 
-                tags.Add((string)reader.Value, reader.ReadAsString());
+                tags.Add((string)reader.Value!, reader.ReadAsString()!);
 
                 reader.Read();
 

@@ -7,7 +7,7 @@ namespace OsmDataKit
     {
         public GeoObject Geo { get; }
 
-        public string Role { get; }
+        public string? Role { get; }
 
         public OsmGeoType Type => Geo.Type;
 
@@ -15,7 +15,7 @@ namespace OsmDataKit
 
         public string Url => Geo.Url;
 
-        public RelationMemberObject(GeoObject geo, string role)
+        public RelationMemberObject(GeoObject geo, string? role)
         {
             Geo = geo ?? throw new ArgumentNullException(nameof(geo));
             Role = role;

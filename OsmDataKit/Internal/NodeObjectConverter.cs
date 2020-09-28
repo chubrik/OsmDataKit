@@ -6,15 +6,15 @@ namespace OsmDataKit.Internal
 {
     internal class NodeObjectConverter : GeoObjectConverter<NodeObject>
     {
-        private const string LocationPropName = "l";
+        private const string _locationPropName = "l";
 
-        public override NodeObject ReadJson(JsonReader reader, Type objectType, NodeObject existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override NodeObject ReadJson(JsonReader reader, Type objectType, NodeObject? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader.TokenType != JsonToken.StartObject)
                 throw new InvalidOperationException();
 
             long id = 0;
-            Dictionary<string, string> tags = null;
+            Dictionary<string, string>? tags = null;
             Location? location = null;
 
             for (; ; )
@@ -22,7 +22,7 @@ namespace OsmDataKit.Internal
                 reader.Read();
 
                 if (reader.TokenType == JsonToken.EndObject)
-                    return new NodeObject(id, location.Value, tags);
+                    return new NodeObject(id, location!.Value, tags);
 
                 if (reader.TokenType != JsonToken.PropertyName)
                     throw new InvalidOperationException();
@@ -38,13 +38,13 @@ namespace OsmDataKit.Internal
                         tags = ReadTagsJson(reader);
                         break;
 
-                    case LocationPropName:
+                    case _locationPropName:
                         reader.Read();
 
                         if (reader.TokenType != JsonToken.StartArray)
                             throw new InvalidOperationException();
 
-                        location = new Location(reader.ReadAsDouble().Value, reader.ReadAsDouble().Value);
+                        location = new Location(reader.ReadAsDouble()!.Value, reader.ReadAsDouble()!.Value);
 
                         reader.Read();
 
@@ -56,13 +56,13 @@ namespace OsmDataKit.Internal
             }
         }
 
-        public override void WriteJson(JsonWriter writer, NodeObject value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, NodeObject? value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
             writer.WritePropertyName(IdPropName);
-            writer.WriteValue(value.Id);
+            writer.WriteValue(value!.Id);
             WriteTagsJson(writer, value);
-            writer.WritePropertyName(LocationPropName);
+            writer.WritePropertyName(_locationPropName);
             writer.WriteStartArray();
             writer.WriteValue(value.Latitude);
             writer.WriteValue(value.Longitude);

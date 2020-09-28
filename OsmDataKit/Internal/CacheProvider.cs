@@ -15,7 +15,7 @@ namespace OsmDataKit.Internal
         {
             var path = CachePath(cacheName);
 
-            return LogService.Log($"Read cache file \"{FileClient.LogPath(path)}\"", () =>
+            return LogService.Log($"Read cache file \"{FileClient.PathForLog(path)}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -26,9 +26,9 @@ namespace OsmDataKit.Internal
 
                 var context = new JsonSerializer().Deserialize<GeoContext>(jsonTextReader);
 
-                if (context.Equals(null))
+                if (context == null)
                     throw new InvalidOperationException(
-                        $"Wrong cache content \"{FileClient.LogPath(path)}\"");
+                        $"Wrong cache content \"{FileClient.PathForLog(path)}\"");
 
                 return context;
             });
@@ -38,7 +38,7 @@ namespace OsmDataKit.Internal
         {
             var path = CachePath(cacheName);
 
-            LogService.Log($"Write cache file \"{FileClient.LogPath(path)}\"", () =>
+            LogService.Log($"Write cache file \"{FileClient.PathForLog(path)}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -50,7 +50,7 @@ namespace OsmDataKit.Internal
 
                 if (!Directory.Exists(dirPath))
                 {
-                    Log.Debug($"Create directory \"{FileClient.LogPath(dirPath)}\"");
+                    Log.Debug($"Create directory \"{FileClient.PathForLog(dirPath)}\"");
                     Directory.CreateDirectory(dirPath);
                 }
 

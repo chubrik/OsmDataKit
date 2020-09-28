@@ -13,14 +13,14 @@ namespace OsmDataKit
     {
         public override OsmGeoType Type => OsmGeoType.Way;
 
-        public IReadOnlyList<NodeObject> Nodes { get; private set; }
+        public IReadOnlyList<NodeObject>? Nodes { get; private set; }
 
-        public IReadOnlyList<long> MissedNodeIds { get; private set; }
+        public IReadOnlyList<long>? MissedNodeIds { get; private set; }
 
         public bool IsComplete => MissedNodeIds == null;
 
         public WayObject(
-            long id, IReadOnlyList<NodeObject> nodes, Dictionary<string, string> tags = null)
+            long id, IReadOnlyList<NodeObject> nodes, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             if (nodes == null)
@@ -33,7 +33,7 @@ namespace OsmDataKit
         }
 
         public WayObject(
-            long id, IReadOnlyList<long> nodeIds, Dictionary<string, string> tags = null)
+            long id, IReadOnlyList<long> nodeIds, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             if (nodeIds == null)

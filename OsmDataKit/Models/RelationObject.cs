@@ -13,12 +13,12 @@ namespace OsmDataKit
     {
         public override OsmGeoType Type => OsmGeoType.Relation;
 
-        public IReadOnlyList<RelationMemberObject> Members { get; private set; }
+        public IReadOnlyList<RelationMemberObject>? Members { get; private set; }
 
-        public IReadOnlyList<RelationMemberInfo> MissedMembers { get; private set; }
+        public IReadOnlyList<RelationMemberInfo>? MissedMembers { get; private set; }
 
         public RelationObject(
-            long id, IReadOnlyList<RelationMemberObject> members, Dictionary<string, string> tags = null)
+            long id, IReadOnlyList<RelationMemberObject> members, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             if (members == null)
@@ -31,7 +31,7 @@ namespace OsmDataKit
         }
 
         public RelationObject(
-            long id, IReadOnlyList<RelationMemberInfo> memberInfos, Dictionary<string, string> tags = null)
+            long id, IReadOnlyList<RelationMemberInfo> memberInfos, Dictionary<string, string>? tags = null)
             : base(id, tags)
         {
             if (memberInfos == null)
@@ -55,9 +55,9 @@ namespace OsmDataKit
 
             Members = members ?? throw new ArgumentNullException(nameof(members));
 
-            var missedDict = new Dictionary<(string, OsmGeoType, long), RelationMemberInfo>(members.Count);
+            var missedDict = new Dictionary<(string? role, OsmGeoType type, long id), RelationMemberInfo>(members.Count);
 
-            foreach (var missedMember in MissedMembers)
+            foreach (var missedMember in MissedMembers!)
                 if (!missedDict.ContainsKey((missedMember.Role, missedMember.Type, missedMember.Id)))
                     missedDict.Add((missedMember.Role, missedMember.Type, missedMember.Id), missedMember);
 
