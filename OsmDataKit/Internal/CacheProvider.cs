@@ -1,12 +1,17 @@
 ﻿using Kit;
-using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 
 namespace OsmDataKit.Internal
 {
     internal static class CacheProvider
     {
+        private static readonly JsonSerializerOptions _options =
+            new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+
         public static bool Has(string cacheName) => File.Exists(CachePath(cacheName));
 
         public static void Delete(string cacheName) => File.Delete(CachePath(cacheName));
@@ -20,11 +25,8 @@ namespace OsmDataKit.Internal
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
 
-                using var fileStream = File.OpenRead(path);
-                using var streamReader = new StreamReader(fileStream);
-                using var jsonTextReader = new JsonTextReader(streamReader);
-
-                var context = new JsonSerializer().Deserialize<GeoContext>(jsonTextReader);
+                var json = File.ReadAllText(path);
+                var context = JsonSerializer.Deserialize<GeoContext>(json, _options);
 
                 if (context == null)
                     throw new InvalidOperationException(
@@ -60,12 +62,8 @@ namespace OsmDataKit.Internal
                     File.Delete(path);
                 }
 
-                using var fileStream = File.OpenWrite(path);
-                using var streamWriter = new StreamWriter(fileStream);
-                using var jsonTextWriter = new JsonTextWriter(streamWriter);
-
-                new JsonSerializer().Serialize(jsonTextWriter, context);
-                jsonTextWriter.Close();
+                var json = JsonSerializer.Serialize(context, _options);
+                File.WriteAllText(path, json);
             });
         }
 

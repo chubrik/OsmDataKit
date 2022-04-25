@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace OsmDataKit.Internal
 {
@@ -8,64 +8,70 @@ namespace OsmDataKit.Internal
     {
         private const string _locationPropName = "l";
 
-        public override NodeObject ReadJson(JsonReader reader, Type objectType, NodeObject? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override NodeObject Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonToken.StartObject)
+            if (reader.TokenType != JsonTokenType.StartObject)
                 throw new InvalidOperationException();
 
             long id = 0;
             Dictionary<string, string>? tags = null;
             Location? location = null;
+            double latitude, longitude;
 
             for (; ; )
             {
                 reader.Read();
 
-                if (reader.TokenType == JsonToken.EndObject)
+                if (reader.TokenType == JsonTokenType.EndObject)
                     return new NodeObject(id, location!.Value, tags);
 
-                if (reader.TokenType != JsonToken.PropertyName)
+                if (reader.TokenType != JsonTokenType.PropertyName)
                     throw new InvalidOperationException();
 
-                switch (reader.Value)
+                switch (reader.GetString())
                 {
                     case IdPropName:
                         reader.Read();
-                        id = (long)reader.Value;
+                        id = reader.GetInt64();
                         break;
 
                     case TagsPropName:
-                        tags = ReadTagsJson(reader);
+                        tags = ReadTagsJson(ref reader);
                         break;
 
                     case _locationPropName:
                         reader.Read();
 
-                        if (reader.TokenType != JsonToken.StartArray)
+                        if (reader.TokenType != JsonTokenType.StartArray)
                             throw new InvalidOperationException();
 
-                        location = new Location(reader.ReadAsDouble()!.Value, reader.ReadAsDouble()!.Value);
-
+                        reader.Read();
+                        latitude = reader.GetDouble();
+                        reader.Read();
+                        longitude = reader.GetDouble();
+                        location = new Location(latitude, longitude);
                         reader.Read();
 
-                        if (reader.TokenType != JsonToken.EndArray)
+                        if (reader.TokenType != JsonTokenType.EndArray)
                             throw new InvalidOperationException();
 
                         break;
+
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
         }
 
-        public override void WriteJson(JsonWriter writer, NodeObject? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, NodeObject value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName(IdPropName);
-            writer.WriteValue(value!.Id);
+            writer.WriteNumber(IdPropName, value.Id);
             WriteTagsJson(writer, value);
             writer.WritePropertyName(_locationPropName);
             writer.WriteStartArray();
-            writer.WriteValue(value.Latitude);
-            writer.WriteValue(value.Longitude);
+            writer.WriteNumberValue(value.Latitude);
+            writer.WriteNumberValue(value.Longitude);
             writer.WriteEndArray();
             writer.WriteEndObject();
         }

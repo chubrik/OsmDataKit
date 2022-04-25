@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using OsmDataKit.Internal;
+﻿using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace OsmDataKit
 {

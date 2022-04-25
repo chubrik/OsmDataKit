@@ -1,10 +1,9 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace OsmDataKit.Internal
 {
-    [JsonObject]
     internal sealed class GeoContext
     {
         [JsonIgnore]
@@ -20,21 +19,21 @@ namespace OsmDataKit.Internal
         public List<long> MissedWayIds { get; set; } = new List<long>(0);
         public List<long> MissedRelationIds { get; set; } = new List<long>(0);
 
-        [JsonProperty("Nodes")]
+        [JsonPropertyName("Nodes")]
         public NodeObject[] JsonNodes
         {
             get => Nodes.Values.ToArray();
             set => Nodes = value.ToDictionary(i => i.Id);
         }
 
-        [JsonProperty("Ways")]
+        [JsonPropertyName("Ways")]
         public WayObject[] JsonWays
         {
             get => Ways.Values.ToArray();
             set => Ways = value.ToDictionary(i => i.Id);
         }
 
-        [JsonProperty("Relations")]
+        [JsonPropertyName("Relations")]
         public RelationObject[] JsonRelations
         {
             get => Relations.Values.ToArray();

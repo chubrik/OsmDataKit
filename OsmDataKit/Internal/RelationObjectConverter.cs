@@ -1,8 +1,8 @@
 ﻿using Kit;
-using Newtonsoft.Json;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace OsmDataKit.Internal
 {
@@ -13,9 +13,9 @@ namespace OsmDataKit.Internal
         private const string _memberIdPropName = IdPropName;
         private const string _memberRolePropName = "r";
 
-        public override RelationObject ReadJson(JsonReader reader, Type objectType, RelationObject? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override RelationObject Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonToken.StartObject)
+            if (reader.TokenType != JsonTokenType.StartObject)
                 throw new InvalidOperationException();
 
             long relationId = 0;
@@ -26,37 +26,37 @@ namespace OsmDataKit.Internal
             {
                 reader.Read();
 
-                if (reader.TokenType == JsonToken.EndObject)
+                if (reader.TokenType == JsonTokenType.EndObject)
                     return new RelationObject(relationId, memberInfos, tags);
 
-                if (reader.TokenType != JsonToken.PropertyName)
+                if (reader.TokenType != JsonTokenType.PropertyName)
                     throw new InvalidOperationException();
 
-                switch (reader.Value)
+                switch (reader.GetString())
                 {
                     case IdPropName:
                         reader.Read();
-                        relationId = (long)reader.Value;
+                        relationId = reader.GetInt64();
                         break;
 
                     case TagsPropName:
-                        tags = ReadTagsJson(reader);
+                        tags = ReadTagsJson(ref reader);
                         break;
 
                     case _membersPropName:
                         reader.Read();
 
-                        if (reader.TokenType != JsonToken.StartArray)
+                        if (reader.TokenType != JsonTokenType.StartArray)
                             throw new InvalidOperationException();
 
                         for (; ; )
                         {
                             reader.Read();
 
-                            if (reader.TokenType == JsonToken.EndArray)
+                            if (reader.TokenType == JsonTokenType.EndArray)
                                 break;
 
-                            if (reader.TokenType != JsonToken.StartObject)
+                            if (reader.TokenType != JsonTokenType.StartObject)
                                 throw new InvalidOperationException();
 
                             OsmGeoType? memberType = null;
@@ -67,43 +67,50 @@ namespace OsmDataKit.Internal
                             {
                                 reader.Read();
 
-                                if (reader.TokenType == JsonToken.EndObject)
+                                if (reader.TokenType == JsonTokenType.EndObject)
                                 {
                                     memberInfos.Add(new RelationMemberInfo(memberType!.Value, memberId, memberRole));
                                     break;
                                 }
 
-                                if (reader.TokenType != JsonToken.PropertyName)
+                                if (reader.TokenType != JsonTokenType.PropertyName)
                                     throw new InvalidOperationException();
 
-                                switch (reader.Value)
+                                switch (reader.GetString())
                                 {
                                     case _memberTypePropName:
-                                        memberType = (OsmGeoType)reader.ReadAsInt32()!;
+                                        reader.Read();
+                                        memberType = (OsmGeoType)reader.GetInt32();
                                         break;
 
                                     case _memberIdPropName:
                                         reader.Read();
-                                        memberId = (long)reader.Value;
+                                        memberId = reader.GetInt64();
                                         break;
 
                                     case _memberRolePropName:
-                                        memberRole = reader.ReadAsString();
+                                        reader.Read();
+                                        memberRole = reader.GetString();
                                         break;
+
+                                    default:
+                                        throw new InvalidOperationException();
                                 }
                             }
                         }
 
                         break;
+
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
         }
 
-        public override void WriteJson(JsonWriter writer, RelationObject? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, RelationObject value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName(IdPropName);
-            writer.WriteValue(value!.Id);
+            writer.WriteNumber(IdPropName, value.Id);
             WriteTagsJson(writer, value);
             writer.WritePropertyName(_membersPropName);
             writer.WriteStartArray();
@@ -111,16 +118,11 @@ namespace OsmDataKit.Internal
             foreach (var member in value.MissedMembers!)
             {
                 writer.WriteStartObject();
-                writer.WritePropertyName(_memberTypePropName);
-                writer.WriteValue((int)member.Type);
-                writer.WritePropertyName(IdPropName);
-                writer.WriteValue(member.Id);
+                writer.WriteNumber(_memberTypePropName, (int)member.Type);
+                writer.WriteNumber(IdPropName, member.Id);
 
                 if (!member.Role.IsNullOrWhiteSpace())
-                {
-                    writer.WritePropertyName(_memberRolePropName);
-                    writer.WriteValue(member.Role);
-                }
+                    writer.WriteString(_memberRolePropName, member.Role);
 
                 writer.WriteEndObject();
             }

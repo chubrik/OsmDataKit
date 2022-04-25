@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace OsmDataKit.Internal
 {
@@ -8,9 +8,9 @@ namespace OsmDataKit.Internal
     {
         private const string _nodeIdsPropName = "n";
 
-        public override WayObject ReadJson(JsonReader reader, Type objectType, WayObject? existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override WayObject Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType != JsonToken.StartObject)
+            if (reader.TokenType != JsonTokenType.StartObject)
                 throw new InvalidOperationException();
 
             long id = 0;
@@ -21,53 +21,55 @@ namespace OsmDataKit.Internal
             {
                 reader.Read();
 
-                if (reader.TokenType == JsonToken.EndObject)
+                if (reader.TokenType == JsonTokenType.EndObject)
                     return new WayObject(id, nodeIds, tags);
 
-                if (reader.TokenType != JsonToken.PropertyName)
+                if (reader.TokenType != JsonTokenType.PropertyName)
                     throw new InvalidOperationException();
 
-                switch (reader.Value)
+                switch (reader.GetString())
                 {
                     case IdPropName:
                         reader.Read();
-                        id = (long)reader.Value;
+                        id = reader.GetInt64();
                         break;
 
                     case TagsPropName:
-                        tags = ReadTagsJson(reader);
+                        tags = ReadTagsJson(ref reader);
                         break;
 
                     case _nodeIdsPropName:
                         reader.Read();
 
-                        if (reader.TokenType != JsonToken.StartArray)
+                        if (reader.TokenType != JsonTokenType.StartArray)
                             throw new InvalidOperationException();
 
                         NextNodeId:
 
                         reader.Read();
 
-                        if (reader.TokenType == JsonToken.EndArray)
+                        if (reader.TokenType == JsonTokenType.EndArray)
                             break;
 
-                        nodeIds.Add((long)reader.Value);
+                        nodeIds.Add(reader.GetInt64());
                         goto NextNodeId;
+
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
         }
 
-        public override void WriteJson(JsonWriter writer, WayObject? value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, WayObject value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName(IdPropName);
-            writer.WriteValue(value!.Id);
+            writer.WriteNumber(IdPropName, value.Id);
             WriteTagsJson(writer, value);
             writer.WritePropertyName(_nodeIdsPropName);
             writer.WriteStartArray();
 
             foreach (var nodeId in value.MissedNodeIds!)
-                writer.WriteValue(nodeId);
+                writer.WriteNumberValue(nodeId);
 
             writer.WriteEndArray();
             writer.WriteEndObject();

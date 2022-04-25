@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OsmDataKit.Internal
 {
@@ -11,36 +12,39 @@ namespace OsmDataKit.Internal
         protected const string TagsPropName = "g";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected Dictionary<string, string>? ReadTagsJson(JsonReader reader)
+        protected Dictionary<string, string>? ReadTagsJson(ref Utf8JsonReader reader)
         {
             reader.Read();
 
-            if (reader.TokenType != JsonToken.StartObject)
+            if (reader.TokenType != JsonTokenType.StartObject)
                 throw new InvalidOperationException();
 
             reader.Read();
 
-            if (reader.TokenType == JsonToken.EndObject)
+            if (reader.TokenType == JsonTokenType.EndObject)
                 return null;
 
             var tags = new Dictionary<string, string>();
+            string key, value;
 
             for (; ; )
             {
-                if (reader.TokenType != JsonToken.PropertyName)
+                if (reader.TokenType != JsonTokenType.PropertyName)
                     throw new InvalidOperationException();
 
-                tags.Add((string)reader.Value!, reader.ReadAsString()!);
-
+                key = reader.GetString()!;
+                reader.Read();
+                value = reader.GetString()!;
+                tags.Add(key, value);
                 reader.Read();
 
-                if (reader.TokenType == JsonToken.EndObject)
+                if (reader.TokenType == JsonTokenType.EndObject)
                     return tags;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void WriteTagsJson(JsonWriter writer, T value)
+        protected void WriteTagsJson(Utf8JsonWriter writer, T value)
         {
             if (value.Tags?.Count > 0)
             {
@@ -48,10 +52,7 @@ namespace OsmDataKit.Internal
                 writer.WriteStartObject();
 
                 foreach (var pair in value.Tags)
-                {
-                    writer.WritePropertyName(pair.Key);
-                    writer.WriteValue(pair.Value);
-                }
+                    writer.WriteString(pair.Key, pair.Value);
 
                 writer.WriteEndObject();
             }
