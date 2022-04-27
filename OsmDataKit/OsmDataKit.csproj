@@ -9,7 +9,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/chubrik/OsmDataKit</RepositoryUrl>
-    <Version>3.0.3</Version>
+    <Version>3.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
