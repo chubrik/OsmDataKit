@@ -1,5 +1,4 @@
-﻿using Kit;
-using OsmSharp;
+﻿using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +41,7 @@ namespace OsmDataKit
 
                 if (geo.Tags != null)
                     foreach (var nameTag in _nameTags)
-                        if (geo.Tags.TryGetValue(nameTag, out var name) && !name.IsNullOrWhiteSpace())
+                        if (geo.Tags.TryGetValue(nameTag, out var name) && !string.IsNullOrWhiteSpace(name))
                             return attr + " - " + name.Trim();
 
                 return attr;

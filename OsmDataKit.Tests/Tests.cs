@@ -10,28 +10,27 @@ namespace OsmDataKit.Tests
         [TestMethod]
         public void ValidatePbf()
         {
-            TestInitialize(nameof(ValidatePbf));
             OsmService.ValidateSource(PbfPath);
         }
 
         [TestMethod]
         public void LoadByFilter()
         {
-            TestInitialize(nameof(LoadByFilter));
-            var geos = OsmService.LoadObjects(PbfPath, "Places", i => i.Tags.ContainsKey("place"));
-            Assert.IsTrue(geos.Nodes.Count > 100);
-            Assert.IsTrue(geos.Ways.Count > 5000);
-            Assert.IsTrue(geos.Relations.Count > 1000);
-            Assert.IsTrue(geos.MissedNodeIds.Count == 0);
-            Assert.IsTrue(geos.MissedWayIds.Count == 0);
-            Assert.IsTrue(geos.MissedRelationIds.Count == 0);
+            for (var i = 0; i < 2; i++)
+            {
+                var geos = OsmService.LoadObjects(PbfPath, "Places", i => i.Tags.ContainsKey("place"));
+                Assert.IsTrue(geos.Nodes.Count > 100);
+                Assert.IsTrue(geos.Ways.Count > 5000);
+                Assert.IsTrue(geos.Relations.Count > 1000);
+                Assert.IsTrue(geos.MissedNodeIds.Count == 0);
+                Assert.IsTrue(geos.MissedWayIds.Count == 0);
+                Assert.IsTrue(geos.MissedRelationIds.Count == 0);
+            }
         }
 
         [TestMethod]
         public void LoadRelationObject()
         {
-            TestInitialize(nameof(LoadRelationObject));
-
             // https://www.openstreetmap.org/relation/2969204
             var title = "Vega Island";
             long relationId = 2969204;

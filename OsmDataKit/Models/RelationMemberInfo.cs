@@ -1,5 +1,4 @@
-﻿using Kit;
-using OsmSharp;
+﻿using OsmSharp;
 using System;
 
 namespace OsmDataKit
@@ -22,7 +21,7 @@ namespace OsmDataKit
             Type = type;
             Id = id;
 
-            if (!role.IsNullOrWhiteSpace())
+            if (!string.IsNullOrWhiteSpace(role))
                 Role = role;
         }
 
@@ -31,7 +30,7 @@ namespace OsmDataKit
             Type = member.Type;
             Id = member.Id;
 
-            if (!member.Role.IsNullOrWhiteSpace())
+            if (!string.IsNullOrWhiteSpace(member.Role))
                 Role = member.Role;
         }
 

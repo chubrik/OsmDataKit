@@ -1,5 +1,4 @@
-﻿using Kit;
-using System;
+﻿using System;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -20,7 +19,7 @@ namespace OsmDataKit.Internal
         {
             var path = CachePath(cacheName);
 
-            return LogService.Log($"Read cache file \"{FileClient.PathForLog(path)}\"", () =>
+            return Logger.Log($"Read cache file \"{path}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -30,7 +29,7 @@ namespace OsmDataKit.Internal
 
                 if (context == null)
                     throw new InvalidOperationException(
-                        $"Wrong cache content \"{FileClient.PathForLog(path)}\"");
+                        $"Wrong cache content \"{path}\"");
 
                 return context;
             });
@@ -40,7 +39,7 @@ namespace OsmDataKit.Internal
         {
             var path = CachePath(cacheName);
 
-            LogService.Log($"Write cache file \"{FileClient.PathForLog(path)}\"", () =>
+            Logger.Log($"Write cache file \"{path}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -52,13 +51,13 @@ namespace OsmDataKit.Internal
 
                 if (!Directory.Exists(dirPath))
                 {
-                    Log.Debug($"Create directory \"{FileClient.PathForLog(dirPath)}\"");
+                    Logger.Debug($"Create directory \"{dirPath}\"");
                     Directory.CreateDirectory(dirPath);
                 }
 
                 if (File.Exists(path))
                 {
-                    Log.Debug("Delete previous cache file");
+                    Logger.Debug("Delete previous cache file");
                     File.Delete(path);
                 }
 

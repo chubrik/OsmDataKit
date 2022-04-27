@@ -1,5 +1,4 @@
-﻿using Kit;
-using OsmSharp;
+﻿using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -121,7 +120,7 @@ namespace OsmDataKit.Internal
                 writer.WriteNumber(_memberTypePropName, (int)member.Type);
                 writer.WriteNumber(IdPropName, member.Id);
 
-                if (!member.Role.IsNullOrWhiteSpace())
+                if (!string.IsNullOrWhiteSpace(member.Role))
                     writer.WriteString(_memberRolePropName, member.Role);
 
                 writer.WriteEndObject();
