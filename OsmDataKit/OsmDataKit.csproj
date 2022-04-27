@@ -1,25 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(NetStandardTargetFramework)</TargetFramework>
-    <Version>3.0.3</Version>
-    <PackageTags>osm openstreetmap data pbf</PackageTags>
     <Authors>Arkadi Chubrik</Authors>
-    <Description>Completed nested geo objects from OSM-PBF. Saving RAM and caching the results.</Description>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/chubrik/OsmDataKit</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>© 2018 Arkadi Chubrik</Copyright>
+    <Description>Completed nested geo objects from OSM-PBF. Saving RAM and caching the results.</Description>
+    <PackageTags>osm openstreetmap data pbf</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/chubrik/OsmDataKit</RepositoryUrl>
+    <Version>3.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\icon.png" Pack="true" PackagePath="" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\icon.png" Link="Pack\icon.png" Pack="true" PackagePath="" />
+    <None Include="..\LICENSE" Link="Pack\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\README.md" Link="Pack\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OsmSharp" Version="6.2.0" />
-    <PackageReference Include="System.Text.Json" Version="6.0.3" />
+    <PackageReference Include="OsmSharp" Version="6.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0' Or '$(TargetFramework)'=='netframework462'">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.*" />
+    <PackageReference Include="System.Text.Json" Version="6.*" />
   </ItemGroup>
 
 </Project>

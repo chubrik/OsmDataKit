@@ -1,20 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(NetCoreAppTargetFramework)</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.1.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="%24*/**" />
-    <EmbeddedResource Remove="%24*/**" />
-    <None Remove="%24*/**" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.*" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.*" />
   </ItemGroup>
 
   <ItemGroup>
