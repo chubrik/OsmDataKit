@@ -1,4 +1,5 @@
 ﻿using OsmDataKit.Internal;
+using OsmDataKit.Logging;
 using OsmSharp;
 using OsmSharp.Streams;
 using System;
@@ -15,7 +16,7 @@ namespace OsmDataKit
         #region Validate
 
         public static void ValidateSource(string pbfPath) =>
-            Logger.Log($"Validate OSM source \"{pbfPath}\"", () =>
+            Logger.Info($"Validate OSM source \"{pbfPath}\"", () =>
             {
                 if (pbfPath == null)
                     throw new ArgumentNullException(nameof(pbfPath));
@@ -35,7 +36,7 @@ namespace OsmDataKit
                     {
                         if (osmGeo.Type > previousType)
                         {
-                            Logger.Log($"{thisCount} {previousType.ToString().ToLower()}s found");
+                            Logger.Info($"{thisCount} {previousType.ToString().ToLower()}s found");
                             totalCount += thisCount;
                             thisCount = 0;
                             previousType = osmGeo.Type;
@@ -61,8 +62,8 @@ namespace OsmDataKit
                 }
 
                 totalCount += thisCount;
-                Logger.Log($"{thisCount} {previousType.ToString().ToLower()}s found");
-                Logger.Log($"{totalCount} total entries");
+                Logger.Info($"{thisCount} {previousType.ToString().ToLower()}s found");
+                Logger.Info($"{totalCount} total entries");
 
                 if (noIdCount > 0)
                     Logger.Warning($"{noIdCount} entries has no id");
@@ -87,7 +88,7 @@ namespace OsmDataKit
         }
 
         private static GeoContext Load(string pbfPath, string? cacheName, Func<OsmGeo, bool> filter, bool loadAllRelations) =>
-            Logger.Log($"Load geo objects \"{pbfPath}\"", () =>
+            Logger.Info($"Load geo objects \"{pbfPath}\"", () =>
             {
                 if (pbfPath == null)
                     throw new ArgumentNullException(nameof(pbfPath));
@@ -142,7 +143,7 @@ namespace OsmDataKit
                         }
                 }
 
-                Logger.Log($"Loaded: {loadedNodes.Count} nodes, {loadedWays.Count} ways, {loadedRelations.Count} relations");
+                Logger.Info($"Loaded: {loadedNodes.Count} nodes, {loadedWays.Count} ways, {loadedRelations.Count} relations");
 
                 var context = new GeoContext
                 {
@@ -172,7 +173,7 @@ namespace OsmDataKit
         }
 
         private static GeoContext Load(string pbfPath, string? cacheName, GeoRequest request, bool loadAllRelations) =>
-            Logger.Log($"Load geo objects \"{pbfPath}\"", () =>
+            Logger.Info($"Load geo objects \"{pbfPath}\"", () =>
             {
                 if (pbfPath == null)
                     throw new ArgumentNullException(nameof(pbfPath));
@@ -236,7 +237,7 @@ namespace OsmDataKit
                                 logMessage = $"{loadedNodes.Count} nodes loaded";
 
                                 if (missedNodeIds.Count == 0)
-                                    Logger.Log(logMessage);
+                                    Logger.Info(logMessage);
                                 else
                                     Logger.Warning($"{logMessage} ({missedNodeIds.Count} missed)");
 
@@ -246,7 +247,7 @@ namespace OsmDataKit
                                     continue;
                                 }
 
-                                Logger.Log("0 ways loaded");
+                                Logger.Info("0 ways loaded");
 
                                 if (requestRelationIds.Count > 0 || loadAllRelations)
                                 {
@@ -280,7 +281,7 @@ namespace OsmDataKit
                                 logMessage = $"{loadedWays.Count} ways loaded";
 
                                 if (missedWayIds.Count == 0)
-                                    Logger.Log(logMessage);
+                                    Logger.Info(logMessage);
                                 else
                                     Logger.Warning($"{logMessage} ({missedWayIds.Count} missed)");
 
@@ -324,7 +325,7 @@ namespace OsmDataKit
                 logMessage = $"{loadedRelations.Count} relations loaded";
 
                 if (missedRelationIds.Count == 0)
-                    Logger.Log(logMessage);
+                    Logger.Info(logMessage);
                 else
                     Logger.Warning($"{logMessage} ({missedRelationIds.Count} missed)");
 
@@ -395,7 +396,7 @@ namespace OsmDataKit
 
         private static CompleteGeoObjects LoadComplete(
             string pbfPath, string? cacheName, GeoRequest? request, Func<OsmGeo, bool>? filter, int? stepLimit, bool loadAllRelations) =>
-            Logger.Log("Load complete geo objects" + (loadAllRelations ? "" : " (Low memory mode)"), () =>
+            Logger.Info("Load complete geo objects" + (loadAllRelations ? "" : " (Low memory mode)"), () =>
             {
                 if (pbfPath == null)
                     throw new ArgumentNullException(nameof(pbfPath));
@@ -412,7 +413,7 @@ namespace OsmDataKit
                     return CompleteObjects(context);
                 }
 
-                Logger.Log($"Step 1", () =>
+                Logger.Info($"Step 1", () =>
                 {
                     var cacheFirstStepName = CacheStepName(cacheName, 1);
 
@@ -447,7 +448,7 @@ namespace OsmDataKit
                     context.MissedRelationIds = context.MissedRelationIds.Distinct().OrderBy(i => i).ToList();
                 });
 
-                Logger.Log(
+                Logger.Info(
                     $"Loaded: {context.Nodes.Count} nodes, " +
                     $"{context.Ways.Count} ways, " +
                     $"{context.Relations.Count} relations");
@@ -461,7 +462,7 @@ namespace OsmDataKit
                 if (useCache)
                 {
                     CacheProvider.Put(cacheName!, context);
-                    Logger.Log($"Delete {doneSteps} extra cache files");
+                    Logger.Info($"Delete {doneSteps} extra cache files");
 
                     for (var i = 1; i <= doneSteps; i++)
                         CacheProvider.Delete(CacheStepName(cacheName!, i)!);
@@ -506,7 +507,7 @@ namespace OsmDataKit
             });
 
         private static bool LoadStep(string pbfPath, string? cacheName, GeoContext context, int step) =>
-            Logger.Log($"Step {step}", () =>
+            Logger.Info($"Step {step}", () =>
             {
                 var useCache = cacheName != null;
                 var cacheStepName = CacheStepName(cacheName, step);
@@ -550,7 +551,7 @@ namespace OsmDataKit
 
                     if (needNodeIds!.Count == 0 && needWayIds!.Count == 0 && needRelIds!.Count == 0)
                     {
-                        Logger.Log("No load needed");
+                        Logger.Info("No load needed");
                         return false;
                     }
 
@@ -578,7 +579,7 @@ namespace OsmDataKit
             });
 
         private static CompleteGeoObjects CompleteObjects(GeoContext context) =>
-            Logger.Log("Build complete objects", () =>
+            Logger.Info("Build complete objects", () =>
             {
                 var allNodes = context.Nodes;
                 var allWays = context.Ways;

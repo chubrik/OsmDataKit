@@ -3,6 +3,5 @@ bin/
 obj/
 $*/
 App_Data/
-*.Local.*
 *.pubxml
 *.user

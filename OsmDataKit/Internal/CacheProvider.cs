@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OsmDataKit.Logging;
+using System;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -19,7 +20,7 @@ namespace OsmDataKit.Internal
         {
             var path = CachePath(cacheName);
 
-            return Logger.Log($"Read cache file \"{path}\"", () =>
+            return Logger.Info($"Read cache file \"{path}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));
@@ -39,7 +40,7 @@ namespace OsmDataKit.Internal
         {
             var path = CachePath(cacheName);
 
-            Logger.Log($"Write cache file \"{path}\"", () =>
+            Logger.Info($"Write cache file \"{path}\"", () =>
             {
                 if (path == null)
                     throw new ArgumentNullException(nameof(path));

@@ -1,8 +1,8 @@
 # [![OsmDataKit project](https://raw.githubusercontent.com/chubrik/OsmDataKit/main/icon.png)](#) OsmDataKit
-[![NuGet version](https://img.shields.io/nuget/v/OsmDataKit)](https://www.nuget.org/packages/OsmDataKit/)
-[![MIT licensed](https://img.shields.io/github/license/chubrik/OsmDataKit)](https://github.com/chubrik/OsmDataKit/blob/main/LICENSE) 
+[![NuGet package](https://img.shields.io/nuget/v/OsmDataKit)](https://www.nuget.org/packages/OsmDataKit/)
+[![MIT license](https://img.shields.io/github/license/chubrik/OsmDataKit)](https://github.com/chubrik/OsmDataKit/blob/main/LICENSE) 
 [![Nuget downloads](https://img.shields.io/nuget/dt/OsmDataKit)](https://www.nuget.org/packages/OsmDataKit/)
-[![GitHub repo stars](https://img.shields.io/github/stars/chubrik/OsmDataKit?style=social)](#)
+[![GitHub stars](https://img.shields.io/github/stars/chubrik/OsmDataKit?style=social)](https://github.com/chubrik/OsmDataKit/stargazers)
 <br><br>
 
 - [Install](#install)
