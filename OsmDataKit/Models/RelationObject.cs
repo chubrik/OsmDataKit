@@ -1,4 +1,6 @@
-﻿using OsmDataKit.Internal;
+﻿namespace OsmDataKit;
+
+using OsmDataKit.Internal;
 using OsmSharp;
 using System;
 using System.Collections.Generic;
@@ -6,65 +8,62 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace OsmDataKit
+[JsonConverter(typeof(RelationObjectConverter))]
+public class RelationObject : GeoObject
 {
-    [JsonConverter(typeof(RelationObjectConverter))]
-    public class RelationObject : GeoObject
+    public override OsmGeoType Type => OsmGeoType.Relation;
+
+    public IReadOnlyList<RelationMemberObject>? Members { get; private set; }
+
+    public IReadOnlyList<RelationMemberInfo>? MissedMembers { get; private set; }
+
+    public RelationObject(
+        long id, IReadOnlyList<RelationMemberObject> members, Dictionary<string, string>? tags = null)
+        : base(id, tags)
     {
-        public override OsmGeoType Type => OsmGeoType.Relation;
+        if (members == null)
+            throw new ArgumentNullException(nameof(members));
 
-        public IReadOnlyList<RelationMemberObject>? Members { get; private set; }
+        if (members.Count == 0)
+            throw new ArgumentException(nameof(members));
 
-        public IReadOnlyList<RelationMemberInfo>? MissedMembers { get; private set; }
+        Members = members;
+    }
 
-        public RelationObject(
-            long id, IReadOnlyList<RelationMemberObject> members, Dictionary<string, string>? tags = null)
-            : base(id, tags)
-        {
-            if (members == null)
-                throw new ArgumentNullException(nameof(members));
+    public RelationObject(
+        long id, IReadOnlyList<RelationMemberInfo> memberInfos, Dictionary<string, string>? tags = null)
+        : base(id, tags)
+    {
+        if (memberInfos == null)
+            throw new ArgumentNullException(nameof(memberInfos));
 
-            if (members.Count == 0)
-                throw new ArgumentException(nameof(members));
+        if (memberInfos.Count == 0)
+            throw new ArgumentException(nameof(memberInfos));
 
-            Members = members;
-        }
+        MissedMembers = memberInfos;
+    }
 
-        public RelationObject(
-            long id, IReadOnlyList<RelationMemberInfo> memberInfos, Dictionary<string, string>? tags = null)
-            : base(id, tags)
-        {
-            if (memberInfos == null)
-                throw new ArgumentNullException(nameof(memberInfos));
+    public RelationObject(Relation relation) : base(relation)
+    {
+        MissedMembers = relation.Members.Select(i => new RelationMemberInfo(i)).ToList();
+    }
 
-            if (memberInfos.Count == 0)
-                throw new ArgumentException(nameof(memberInfos));
+    internal void FillMembers(IReadOnlyList<RelationMemberObject> members)
+    {
+        Debug.Assert(Members == null);
+        Debug.Assert(members.Count > 0);
 
-            MissedMembers = memberInfos;
-        }
+        Members = members ?? throw new ArgumentNullException(nameof(members));
 
-        public RelationObject(Relation relation) : base(relation)
-        {
-            MissedMembers = relation.Members.Select(i => new RelationMemberInfo(i)).ToList();
-        }
+        var missedDict = new Dictionary<(string? role, OsmGeoType type, long id), RelationMemberInfo>(members.Count);
 
-        internal void FillMembers(IReadOnlyList<RelationMemberObject> members)
-        {
-            Debug.Assert(Members == null);
-            Debug.Assert(members.Count > 0);
+        foreach (var missedMember in MissedMembers!)
+            if (!missedDict.ContainsKey((missedMember.Role, missedMember.Type, missedMember.Id)))
+                missedDict.Add((missedMember.Role, missedMember.Type, missedMember.Id), missedMember);
 
-            Members = members ?? throw new ArgumentNullException(nameof(members));
+        foreach (var member in members)
+            missedDict.Remove((member.Role, member.Type, member.Id));
 
-            var missedDict = new Dictionary<(string? role, OsmGeoType type, long id), RelationMemberInfo>(members.Count);
-
-            foreach (var missedMember in MissedMembers!)
-                if (!missedDict.ContainsKey((missedMember.Role, missedMember.Type, missedMember.Id)))
-                    missedDict.Add((missedMember.Role, missedMember.Type, missedMember.Id), missedMember);
-
-            foreach (var member in members)
-                missedDict.Remove((member.Role, member.Type, member.Id));
-
-            MissedMembers = missedDict.Count > 0 ? missedDict.Values.ToList() : null;
-        }
+        MissedMembers = missedDict.Count > 0 ? missedDict.Values.ToList() : null;
     }
 }
