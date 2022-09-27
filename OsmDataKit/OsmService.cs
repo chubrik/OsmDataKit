@@ -25,8 +25,10 @@ public static class OsmService
             long? previousId = 0;
             long thisCount = 0;
             long totalCount = 0;
-            long noIdCount = 0;
-            long noRoleCount = 0;
+            var noIdCount = 0;
+            var wayNoNodesCount = 0;
+            var relNoMembersCount = 0;
+            var relNoRoleCount = 0;
 
             using (var fileStream = File.OpenRead(pbfPath))
             {
@@ -34,10 +36,11 @@ public static class OsmService
 
                 foreach (var osmGeo in osmSource)
                 {
+                    totalCount++;
+
                     if (osmGeo.Type > previousType)
                     {
                         Logger.Info($"{thisCount} {previousType.ToString().ToLower()}s found");
-                        totalCount += thisCount;
                         thisCount = 0;
                         previousType = osmGeo.Type;
                         previousId = 0;
@@ -49,27 +52,46 @@ public static class OsmService
                     if (id != null)
                     {
                         if (osmGeo.Type < previousType || id < previousId)
-                            Logger.Warning($"Was: {previousType}-{previousId}, now: {osmGeo.Type}-{id}");
+                            Logger.Warning($"Entries not sorted: was {previousType}-{previousId}, then {osmGeo.Type}-{id}");
 
                         previousId = id;
                     }
                     else
                         noIdCount++;
 
-                    if (osmGeo.Type == OsmGeoType.Relation && ((Relation)osmGeo).Members.Any(i => string.IsNullOrWhiteSpace(i.Role)))
-                        noRoleCount++;
+                    if (osmGeo.Type == OsmGeoType.Way)
+                    {
+                        if (((Way)osmGeo).Nodes.Length == 0)
+                            wayNoNodesCount++;
+                    }
+                    else
+                    if (osmGeo.Type == OsmGeoType.Relation)
+                    {
+                        var members = ((Relation)osmGeo).Members;
+
+                        if (members.Length == 0)
+                            relNoMembersCount++;
+                        else
+                        if (members.Any(i => string.IsNullOrWhiteSpace(i.Role)))
+                            relNoRoleCount++;
+                    }
                 }
             }
 
-            totalCount += thisCount;
             Logger.Info($"{thisCount} {previousType.ToString().ToLower()}s found");
             Logger.Info($"{totalCount} total entries");
 
             if (noIdCount > 0)
                 Logger.Warning($"{noIdCount} entries has no id");
 
-            if (noRoleCount > 0)
-                Logger.Warning($"{noRoleCount} relation members has no role");
+            if (wayNoNodesCount > 0)
+                Logger.Warning($"{wayNoNodesCount} ways has no nodes");
+
+            if (relNoMembersCount > 0)
+                Logger.Warning($"{relNoMembersCount} relation has no members");
+
+            if (relNoRoleCount > 0)
+                Logger.Warning($"{relNoRoleCount} relation members has no role");
         });
 
     #endregion
